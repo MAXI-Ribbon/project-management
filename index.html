@@ -1138,13 +1138,20 @@
             const todayStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
             document.getElementById('createDate').value = todayStr;
             document.getElementById('editId').value = '';
+
+            // 清空 7 个阶段日期
             stages.forEach((s, i) => {
                 document.getElementById(`stageDate_${i}`).value = '';
+            });
+
+            // 清空 5 个进度款输入框
+            for (let i = 0; i < 5; i++) {
                 document.getElementById(`paymentPercent_${i}`).value = '';
                 document.getElementById(`paymentAmount_${i}`).value = '';
                 document.getElementById(`paymentNote_${i}`).value = '';
                 document.getElementById(`paymentPaid_${i}`).checked = false;
-            });
+            }
+
             document.getElementById('currentStage').value = '0';
             updateTotalSummary();
             document.getElementById('modal').classList.add('show');
@@ -1168,23 +1175,22 @@
                 document.getElementById(`stageDate_${i}`).value = project.stageDates ? (project.stageDates[i] || '') : '';
             });
 
-            // 填充进度款 - 遍历全部5个索引，确保彻底清空残留
+            // 填充进度款 - 先清空所有5个输入框，再填充已有数据
             for (let i = 0; i < 5; i++) {
-                let p = null;
-                if (project.progressPayments && i < project.progressPayments.length) {
-                    p = project.progressPayments[i];
-                }
-                if (p) {
-                    document.getElementById(`paymentPercent_${i}`).value = p.percent || '';
-                    document.getElementById(`paymentAmount_${i}`).value = p.amount || '';
-                    document.getElementById(`paymentNote_${i}`).value = p.note || '';
-                    document.getElementById(`paymentPaid_${i}`).checked = !!p.paid;
-                } else {
-                    document.getElementById(`paymentPercent_${i}`).value = '';
-                    document.getElementById(`paymentAmount_${i}`).value = '';
-                    document.getElementById(`paymentNote_${i}`).value = '';
-                    document.getElementById(`paymentPaid_${i}`).checked = false;
-                }
+                document.getElementById(`paymentPercent_${i}`).value = '';
+                document.getElementById(`paymentAmount_${i}`).value = '';
+                document.getElementById(`paymentNote_${i}`).value = '';
+                document.getElementById(`paymentPaid_${i}`).checked = false;
+            }
+            if (project.progressPayments && Array.isArray(project.progressPayments)) {
+                project.progressPayments.forEach((p, i) => {
+                    if (p && i < 5) {
+                        document.getElementById(`paymentPercent_${i}`).value = p.percent !== null ? p.percent : '';
+                        document.getElementById(`paymentAmount_${i}`).value = p.amount !== null ? p.amount : '';
+                        document.getElementById(`paymentNote_${i}`).value = p.note || '';
+                        document.getElementById(`paymentPaid_${i}`).checked = !!p.paid;
+                    }
+                });
             }
 
             updateTotalSummary();
@@ -1205,7 +1211,7 @@
                 stageDates[i] = document.getElementById(`stageDate_${i}`).value || '';
             });
 
-            // 收集进度款
+            // 收集进度款 - 只保存有数据的项，空项跳过不保存
             const progressPayments = [];
             for (let i = 0; i < 5; i++) {
                 const percent = document.getElementById(`paymentPercent_${i}`).value;
@@ -1219,8 +1225,6 @@
                         note: note,
                         paid: paid
                     });
-                } else {
-                    progressPayments.push(null);
                 }
             }
 
