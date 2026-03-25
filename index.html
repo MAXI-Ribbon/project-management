@@ -925,6 +925,16 @@
             switchPage();
             renderCurrentPage();
             renderCalendar();
+
+            // 监听总金额变化重新计算
+            document.getElementById('totalAmount').addEventListener('input', () => {
+                for (let i = 0; i < 5; i++) {
+                    if (document.getElementById(`paymentPercent_${i}`).value) {
+                        updatePaymentFromPercent(i);
+                    }
+                }
+                updateTotalSummary();
+            });
         });
 
         function switchPage() {
@@ -1018,17 +1028,7 @@
             document.getElementById('unpaidTotal').textContent = `$${unpaidTotal.toFixed(2)}`;
         }
 
-        // 监听总金额变化重新计算
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('totalAmount').addEventListener('input', () => {
-                for (let i = 0; i < 5; i++) {
-                    if (document.getElementById(`paymentPercent_${i}`).value) {
-                        updatePaymentFromPercent(i);
-                    }
-                }
-                updateTotalSummary();
-            });
-        });
+
 
         function calculateDaysLeft(dateStr) {
             if (!dateStr) return null;
@@ -1130,6 +1130,7 @@
                 }
             }
 
+            // 触发一次计算更新
             updateTotalSummary();
             document.getElementById('modal').classList.add('show');
         }
