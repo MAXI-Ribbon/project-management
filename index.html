@@ -394,16 +394,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="progress">当前进展 (%)</label>
-                        <input type="number" id="progress" min="0" max="100" value="0">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="status">项目状态</label>
-                        <select id="status">
-                            <option value="not-started">未开始</option>
-                            <option value="in-progress">进行中</option>
-                            <option value="completed">已完成</option>
+                        <label for="stage">当前生产阶段</label>
+                        <select id="stage">
+                            <option value="0">未开始 - 0%</option>
+                            <option value="1">1. 报价 - 20%</option>
+                            <option value="2">2. 量尺 - 40%</option>
+                            <option value="3">3. 排产 - 60%</option>
+                            <option value="4">4. 切板与组装 - 80%</option>
+                            <option value="5">5. Delivered - 100%</option>
                         </select>
                     </div>
 
@@ -421,10 +419,19 @@
     </div>
 
     <script>
+        const stages = [
+            { id: 0, name: '未开始', progress: 0, status: 'not-started' },
+            { id: 1, name: '1. 报价', progress: 20, status: 'in-progress' },
+            { id: 2, name: '2. 量尺', progress: 40, status: 'in-progress' },
+            { id: 3, name: '3. 排产', progress: 60, status: 'in-progress' },
+            { id: 4, name: '4. 切板与组装', progress: 80, status: 'in-progress' },
+            { id: 5, name: '5. Delivered', progress: 100, status: 'completed' }
+        ];
+
         const statusConfig = {
             'not-started': { name: '未开始', color: '#fa8c16', bg: '#fff7e6' },
             'in-progress': { name: '进行中', color: '#1890ff', bg: '#e6f7ff' },
-            'completed': { name: '已完成', color: '#52c41a', bg: '#f6ffed' }
+            'completed': { name: '已交付', color: '#52c41a', bg: '#f6ffed' }
         };
 
         let draggedProject = null;
@@ -478,7 +485,7 @@
             document.getElementById('projectForm').reset();
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('createDate').value = today;
-            document.getElementById('progress').value = 0;
+            document.getElementById('stage').value = '0';
             document.getElementById('editId').value = '';
             document.getElementById('modal').classList.add('show');
         }
@@ -489,8 +496,7 @@
             document.getElementById('projectName').value = project.name;
             document.getElementById('createDate').value = project.createDate;
             document.getElementById('expectedDate').value = project.expectedDate || '';
-            document.getElementById('progress').value = project.progress;
-            document.getElementById('status').value = project.status;
+            document.getElementById('stage').value = project.stage || '0';
             document.getElementById('description').value = project.description || '';
             document.getElementById('modal').classList.add('show');
         }
@@ -502,13 +508,16 @@
         function saveProject() {
             const projects = getProjects();
             const editId = document.getElementById('editId').value;
+            const stageIndex = parseInt(document.getElementById('stage').value);
+            const stageInfo = stages[stageIndex];
 
             const project = {
                 name: document.getElementById('projectName').value.trim(),
                 createDate: document.getElementById('createDate').value || new Date().toISOString().split('T')[0],
                 expectedDate: document.getElementById('expectedDate').value,
-                progress: parseInt(document.getElementById('progress').value) || 0,
-                status: document.getElementById('status').value,
+                stage: stageIndex,
+                progress: stageInfo.progress,
+                status: stageInfo.status,
                 description: document.getElementById('description').value.trim()
             };
 
@@ -551,22 +560,34 @@
                 project.status = newStatus;
                 if (newStatus === 'completed') {
                     project.progress = 100;
+                    project.stage = 5;
                 }
                 saveProjects(projects);
                 renderBoard();
             }
         }
 
-        function updateProgress(id, delta) {
+        function nextStage(id) {
             const projects = getProjects();
             const project = projects.find(p => p.id === id);
-            if (project) {
-                project.progress = Math.max(0, Math.min(100, project.progress + delta));
-                if (project.progress >= 100) {
-                    project.status = 'completed';
-                } else if (project.progress > 0 && project.status === 'not-started') {
-                    project.status = 'in-progress';
-                }
+            if (project && project.stage < 5) {
+                project.stage += 1;
+                const stageInfo = stages[project.stage];
+                project.progress = stageInfo.progress;
+                project.status = stageInfo.status;
+                saveProjects(projects);
+                renderBoard();
+            }
+        }
+
+        function prevStage(id) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === id);
+            if (project && project.stage > 0) {
+                project.stage -= 1;
+                const stageInfo = stages[project.stage];
+                project.progress = stageInfo.progress;
+                project.status = stageInfo.status;
                 saveProjects(projects);
                 renderBoard();
             }
@@ -629,6 +650,10 @@
                                 <span>创建：${project.createDate}</span>
                                 ${badge}
                             </div>
+                            <div class="card-info">
+                                <span>当前阶段：${stages[project.stage || 0].name}</span>
+                                ${badge}
+                            </div>
                             ${project.expectedDate ? `
                                 <div class="card-info">
                                     <span>预期完成：${project.expectedDate}</span>
@@ -648,7 +673,9 @@
                                     <div class="progress-fill" style="width: ${project.progress}%"></div>
                                 </div>
                             </div>
-                            <div class="card-actions">
+                            <div class="card-actions" style="margin-top: 10px;">
+                                ${project.stage > 0 ? `<button class="btn-success" onclick="event.stopPropagation(); prevStage(${project.id})">上一阶段</button>` : ''}
+                                ${project.stage < 5 ? `<button class="btn-success" onclick="event.stopPropagation(); nextStage(${project.id})">下一阶段</button>` : ''}
                                 <button class="btn-primary" onclick="event.stopPropagation(); editProject(${project.id})">编辑</button>
                                 <button class="btn-danger" onclick="event.stopPropagation(); deleteProject(${project.id})">删除</button>
                             </div>
@@ -806,8 +833,9 @@
                         name: line.substring(0, 50),
                         createDate: item.date,
                         expectedDate: '',
-                        progress: 0,
-                        status: 'not-started',
+                        stage: 1,
+                        progress: 20,
+                        status: 'in-progress',
                         description: item.project
                     });
                     count++;
