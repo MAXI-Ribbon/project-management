@@ -679,9 +679,19 @@
         <div id="calendarPage" class="page-view">
             <div class="calendar-container">
                 <div class="calendar-header">
-                    <button class="btn-primary" id="prevMonth">&lt; 上个月</button>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label for="calendarView" style="margin: 0; white-space: nowrap;">视图：</label>
+                        <select id="calendarView" style="width: auto; margin: 0;">
+                            <option value="day">日</option>
+                            <option value="week">周</option>
+                            <option value="month" selected>月</option>
+                        </select>
+                    </div>
                     <div class="calendar-month" id="calendarMonth"></div>
-                    <button class="btn-primary" id="nextMonth">下个月 &gt;</button>
+                    <div>
+                        <button class="btn-primary" id="prevCalendar">&lt; 上一页</button>
+                        <button class="btn-primary" id="nextCalendar">下一页 &gt;</button>
+                    </div>
                 </div>
                 <div class="calendar-grid" id="calendarGrid"></div>
             </div>
@@ -813,6 +823,9 @@
 
         let draggedProject = null;
         let currentCalendar = { year: null, month: null };
+        let currentWeek = { year: null, week: null }; // ISO 周日
+        let currentDay = { year: null, month: null, day: null };
+        let calendarView = 'month'; // month | week | day
         let pendingTempDate = null;
         let pendingTempEditId = null;
 
@@ -824,6 +837,11 @@
             const todayStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
             currentCalendar.year = today.getFullYear();
             currentCalendar.month = today.getMonth();
+            currentWeek.year = today.getFullYear();
+            currentWeek.week = getWeekNumber(today);
+            currentDay.year = today.getFullYear();
+            currentDay.month = today.getMonth();
+            currentDay.day = today.getDate();
 
             // 生成阶段选择和日期输入
             const stageContainer = document.getElementById('stageDatesContainer');
@@ -896,8 +914,13 @@
             document.getElementById('importFile').addEventListener('change', importJsonData);
             document.getElementById('clearBtn').addEventListener('click', clearAll);
             document.getElementById('searchInput').addEventListener('input', renderCurrentPage);
-            document.getElementById('prevMonth').addEventListener('click', prevMonth);
-            document.getElementById('nextMonth').addEventListener('click', nextMonth);
+            document.getElementById('prevCalendar').addEventListener('click', prevCalendar);
+            document.getElementById('nextCalendar').addEventListener('click', nextCalendar);
+            document.getElementById('calendarView').addEventListener('change', (e) => {
+                calendarView = e.target.value;
+                // 视图切换不需要修改日期，当前日期保持正确
+                renderCalendar();
+            });
             document.getElementById('closeTempModal').addEventListener('click', closeTempModal);
             document.getElementById('cancelTempBtn').addEventListener('click', closeTempModal);
             document.getElementById('saveTempBtn').addEventListener('click', saveTempWork);
@@ -1456,8 +1479,128 @@
             });
         }
 
-        // === 日历视图 ===
+        // === 收集所有项目阶段事件 ===
+        function getAllProjectEvents() {
+            const projects = getProjects();
+            const events = [];
+            projects.forEach(project => {
+                // 添加预期完成日期
+                if (project.expectedDate) {
+                    events.push({
+                        date: project.expectedDate,
+                        projectId: project.id,
+                        stageName: '预期完成',
+                        projectName: project.name
+                    });
+                }
+                // 添加所有阶段日期
+                if (project.stageDates) {
+                    Object.keys(project.stageDates).forEach(stageId => {
+                        const dateStr = project.stageDates[stageId];
+                        if (dateStr) {
+                            events.push({
+                                date: dateStr,
+                                projectId: project.id,
+                                stageName: stages[parseInt(stageId)].name,
+                                projectName: project.name
+                            });
+                        }
+                    });
+                }
+            });
+            return events;
+        }
+
+        // === 获取ISO周日序号 => 第几周
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        // === 从日期获取周一所在的周
+        function getFirstDayOfWeek(year, week) {
+            const date = new Date(year, 0, 1 + (week - 1) * 7);
+            const day = date.getDay();
+            return new Date(date.setDate(date.getDate() - day));
+        }
+
+        // === 日历视图：日/周/月 统一渲染入口 ===
         function renderCalendar() {
+            document.getElementById('calendarView').value = calendarView;
+
+            switch (calendarView) {
+                case 'day':
+                    renderDayView();
+                    break;
+                case 'week':
+                    renderWeekView();
+                    break;
+                case 'month':
+                    renderMonthView();
+                    break;
+            }
+        }
+
+        // 上一页/下一页 统一处理
+        function prevCalendar() {
+            switch (calendarView) {
+                case 'day':
+                    currentDay.day--;
+                    const d1 = new Date(currentDay.year, currentDay.month, currentDay.day);
+                    currentDay.year = d1.getFullYear();
+                    currentDay.month = d1.getMonth();
+                    currentDay.day = d1.getDate();
+                    break;
+                case 'week':
+                    currentWeek.week--;
+                    if (currentWeek.week < 1) {
+                        currentWeek.week = 52;
+                        currentWeek.year--;
+                    }
+                    break;
+                case 'month':
+                    currentCalendar.month--;
+                    if (currentCalendar.month < 0) {
+                        currentCalendar.month = 11;
+                        currentCalendar.year--;
+                    }
+                    break;
+            }
+            renderCalendar();
+        }
+
+        function nextCalendar() {
+            switch (calendarView) {
+                case 'day':
+                    currentDay.day++;
+                    const d1 = new Date(currentDay.year, currentDay.month, currentDay.day);
+                    currentDay.year = d1.getFullYear();
+                    currentDay.month = d1.getMonth();
+                    currentDay.day = d1.getDate();
+                    break;
+                case 'week':
+                    currentWeek.week++;
+                    if (currentWeek.week > 52) {
+                        currentWeek.week = 1;
+                        currentWeek.year++;
+                    }
+                    break;
+                case 'month':
+                    currentCalendar.month++;
+                    if (currentCalendar.month > 11) {
+                        currentCalendar.month = 0;
+                        currentCalendar.year++;
+                    }
+                    break;
+            }
+            renderCalendar();
+        }
+
+        // === 月视图渲染 (原有逻辑，升级显示所有阶段) ===
+        function renderMonthView() {
             const { year, month } = currentCalendar;
             document.getElementById('calendarMonth').textContent = `${year}年 ${month + 1}月`;
 
@@ -1469,6 +1612,7 @@
 
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
+            grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
 
             // 星期表头
             const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -1478,6 +1622,9 @@
                 div.textContent = w;
                 grid.appendChild(div);
             });
+
+            const allEvents = getAllProjectEvents();
+            const tempWorks = getTempWorks();
 
             // 上个月填充
             const prevLastDay = new Date(year, month, 0).getDate();
@@ -1489,13 +1636,12 @@
             }
 
             // 当月天数
-            const projects = getProjects();
-            const tempWorks = getTempWorks();
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
                 const dateStr = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
                 let classes = 'calendar-day';
+                // 高亮今天
                 if (date.getFullYear() === today.getFullYear() &&
                     date.getMonth() === today.getMonth() &&
                     date.getDate() === today.getDate()) {
@@ -1506,14 +1652,14 @@
                 div.className = classes;
                 div.innerHTML = `<div class="day-number">${day}<button class="add-temp-btn" onclick="openAddTempWork('${dateStr}')">+</button></div>`;
 
-                // 获取当天项目（预期完成日期是今天的）
-                const dayProjects = projects.filter(p => p.expectedDate === dateStr);
-                dayProjects.forEach(p => {
-                    const ev = document.createElement('div');
-                    ev.className = 'calendar-event project';
-                    ev.textContent = p.name;
-                    ev.onclick = () => openEditModal(p.id);
-                    div.appendChild(ev);
+                // 获取当天项目阶段事件
+                const dayEvents = allEvents.filter(ev => ev.date === dateStr);
+                dayEvents.forEach(ev => {
+                    const divEv = document.createElement('div');
+                    divEv.className = 'calendar-event project';
+                    divEv.textContent = `${ev.projectName} (${ev.stageName})`;
+                    divEv.onclick = () => openEditModal(ev.projectId);
+                    div.appendChild(divEv);
                 });
 
                 // 获取当天临时工作
@@ -1539,22 +1685,128 @@
             }
         }
 
-        function prevMonth() {
-            currentCalendar.month--;
-            if (currentCalendar.month < 0) {
-                currentCalendar.month = 11;
-                currentCalendar.year--;
+        // === 周视图渲染 ===
+        function renderWeekView() {
+            const { year, week } = currentWeek;
+            document.getElementById('calendarMonth').textContent = `${year}年 第${week}周`;
+
+            const start = getFirstDayOfWeek(year, week);
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            weekdays.forEach(w => {
+                const div = document.createElement('div');
+                div.className = 'calendar-weekday';
+                div.textContent = w;
+                grid.appendChild(div);
+            });
+
+            const allEvents = getAllProjectEvents();
+            const tempWorks = getTempWorks();
+            const today = new Date();
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(start);
+                date.setDate(start.getDate() + i);
+                const dateStr = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+                let classes = 'calendar-day';
+                if (date.getFullYear() === today.getFullYear() &&
+                    date.getMonth() === today.getMonth() &&
+                    date.getDate() === today.getDate()) {
+                    classes += ' today';
+                }
+
+                const div = document.createElement('div');
+                div.className = classes;
+                div.style.minHeight = '150px';
+                div.innerHTML = `<div class="day-number">${date.getDate()} (${date.getMonth() + 1}月)<button class="add-temp-btn" onclick="openAddTempWork('${dateStr}')">+</button></div>`;
+
+                const dayEvents = allEvents.filter(ev => ev.date === dateStr);
+                dayEvents.forEach(ev => {
+                    const divEv = document.createElement('div');
+                    divEv.className = 'calendar-event project';
+                    divEv.textContent = `${ev.projectName} (${ev.stageName})`;
+                    divEv.onclick = () => openEditModal(ev.projectId);
+                    div.appendChild(divEv);
+                });
+
+                const dayTemps = tempWorks.filter(t => t.date === dateStr);
+                dayTemps.forEach(t => {
+                    const ev = document.createElement('div');
+                    ev.className = 'calendar-event temp';
+                    ev.textContent = t.title;
+                    ev.onclick = () => openTempDetail(t);
+                    div.appendChild(ev);
+                });
+
+                grid.appendChild(div);
             }
-            renderCalendar();
         }
 
-        function nextMonth() {
-            currentCalendar.month++;
-            if (currentCalendar.month > 11) {
-                currentCalendar.month = 0;
-                currentCalendar.year++;
+        // === 日视图渲染 ===
+        function renderDayView() {
+            const { year, month, day } = currentDay;
+            const date = new Date(year, month, day);
+            const dateStr = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+            document.getElementById('calendarMonth').textContent = `${year}年 ${month + 1}月 ${day}日`;
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = '1fr';
+
+            const allEvents = getAllProjectEvents();
+            const tempWorks = getTempWorks();
+            const today = new Date();
+
+            let classes = 'calendar-day';
+            if (date.getFullYear() === today.getFullYear() &&
+                date.getMonth() === today.getMonth() &&
+                date.getDate() === today.getDate()) {
+                classes += ' today';
             }
-            renderCalendar();
+
+            const div = document.createElement('div');
+            div.className = classes;
+            div.style.minHeight = '400px';
+            div.innerHTML = `<div class="day-number" style="margin-bottom: 15px;">${dateStr} <button class="add-temp-btn" onclick="openAddTempWork('${dateStr}')">+</button></div>`;
+
+            // 项目阶段事件按项目分组
+            const dayEvents = allEvents.filter(ev => ev.date === dateStr);
+            if (dayEvents.length > 0) {
+                div.innerHTML += `<div style="margin-bottom: 10px;"><strong>项目计划 (${dayEvents.length})</strong></div>`;
+                dayEvents.forEach(ev => {
+                    const divEv = document.createElement('div');
+                    divEv.className = 'calendar-event project';
+                    divEv.style.fontSize = '14px';
+                    divEv.style.padding = '8px';
+                    divEv.style.marginBottom = '8px';
+                    divEv.textContent = `${ev.projectName} → ${ev.stageName}`;
+                    divEv.onclick = () => openEditModal(ev.projectId);
+                    div.appendChild(divEv);
+                });
+            }
+
+            const dayTemps = tempWorks.filter(t => t.date === dateStr);
+            if (dayTemps.length > 0) {
+                div.innerHTML += `<div style="margin: 15px 0 10px 0;"><strong>临时工作 (${dayTemps.length})</strong></div>`;
+                dayTemps.forEach(t => {
+                    const ev = document.createElement('div');
+                    ev.className = 'calendar-event temp';
+                    ev.style.fontSize = '14px';
+                    ev.style.padding = '8px';
+                    ev.style.marginBottom = '8px';
+                    ev.textContent = t.title;
+                    if (t.note) ev.textContent += ` → ${t.note}`;
+                    ev.onclick = () => openTempDetail(t);
+                    div.appendChild(ev);
+                });
+
+                grid.appendChild(div);
+            }
         }
 
         // === 临时工作 ===
