@@ -581,6 +581,55 @@
             font-size: 12px;
         }
 
+        /* === 进度款样式 === */
+        .progress-payment-item {
+            display: grid;
+            grid-template-columns: 80px 100px 100px 1fr auto;
+            gap: 8px;
+            align-items: end;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            background: #fafafa;
+        }
+
+        .progress-payment-item label {
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .progress-payment-item input {
+            padding: 6px 8px;
+            font-size: 13px;
+        }
+
+        .progress-payment-item .paid-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding-bottom: 6px;
+        }
+
+        .progress-payment-item .paid-checkbox input {
+            width: auto;
+            margin: 0;
+        }
+
+        @media (max-width: 600px) {
+            .progress-payment-item {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .payment-summary {
+            margin-top: 8px;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
         @media (max-width: 1600px) {
             .kanban-board {
                 grid-template-columns: repeat(4, minmax(200px, 1fr));
@@ -685,6 +734,28 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="totalAmount">项目总金额 ($)</label>
+                        <input type="number" id="totalAmount" step="0.01" placeholder="输入项目总金额">
+                    </div>
+
+                    <div class="form-group">
+                        <label>进度款（最多5笔）</label>
+                        <div id="progressPaymentsContainer">
+                            <!-- 5个进度款输入框 -->
+                        </div>
+                        <div style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>已付总额：</span>
+                                <strong id="paidTotal">$0.00</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>未付总额：</span>
+                                <strong id="unpaidTotal" style="color: #cf1322;">$0.00</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="description">备注 / 联系人信息</label>
                         <textarea id="description" placeholder="输入联系人电话、备注信息等"></textarea>
                     </div>
@@ -781,6 +852,46 @@
                 stageSelect.appendChild(option);
             });
 
+            // 生成5个进度款输入框
+            const paymentContainer = document.getElementById('progressPaymentsContainer');
+            for (let i = 0; i < 5; i++) {
+                const div = document.createElement('div');
+                div.className = 'progress-payment-item';
+                div.innerHTML = `
+                    <div>
+                        <label>进度 ${i+1}</label>
+                    </div>
+                    <div>
+                        <label>百分比 %</label>
+                        <input type="number" id="paymentPercent_${i}" min="0" max="100" step="0.1" placeholder="%">
+                    </div>
+                    <div>
+                        <label>金额 $</label>
+                        <input type="number" id="paymentAmount_${i}" min="0" step="0.01" placeholder="$">
+                    </div>
+                    <div>
+                        <label>备注</label>
+                        <input type="text" id="paymentNote_${i}" placeholder="付款备注">
+                    </div>
+                    <div class="paid-checkbox">
+                        <input type="checkbox" id="paymentPaid_${i}">
+                        <label>已付</label>
+                    </div>
+                `;
+                paymentContainer.appendChild(div);
+
+                // 绑定双向计算
+                document.getElementById(`paymentPercent_${i}`).addEventListener('input', () => {
+                    updatePaymentFromPercent(i);
+                    updateTotalSummary();
+                });
+                document.getElementById(`paymentAmount_${i}`).addEventListener('input', () => {
+                    updatePaymentFromAmount(i);
+                    updateTotalSummary();
+                });
+                document.getElementById(`paymentPaid_${i}`).addEventListener('change', updateTotalSummary);
+            }
+
             // 绑定事件
             document.getElementById('pageSelector').addEventListener('change', switchPage);
             document.getElementById('addProjectBtn').addEventListener('click', openAddModal);
@@ -872,6 +983,53 @@
             return now.toLocaleString('zh-CN');
         }
 
+        // === 进度款计算 ===
+        function updatePaymentFromPercent(index) {
+            const total = parseFloat(document.getElementById('totalAmount').value);
+            const percent = parseFloat(document.getElementById(`paymentPercent_${index}`).value);
+            if (!isNaN(total) && !isNaN(percent)) {
+                const amount = (total * percent / 100);
+                document.getElementById(`paymentAmount_${index}`).value = amount.toFixed(2);
+            }
+        }
+
+        function updatePaymentFromAmount(index) {
+            const total = parseFloat(document.getElementById('totalAmount').value);
+            const amount = parseFloat(document.getElementById(`paymentAmount_${index}`).value);
+            if (!isNaN(total) && total > 0 && !isNaN(amount)) {
+                const percent = (amount / total * 100);
+                document.getElementById(`paymentPercent_${index}`).value = percent.toFixed(1);
+            }
+        }
+
+        function updateTotalSummary() {
+            const total = parseFloat(document.getElementById('totalAmount').value) || 0;
+            let paidTotal = 0;
+            for (let i = 0; i < 5; i++) {
+                if (document.getElementById(`paymentPaid_${i}`).checked) {
+                    const amount = parseFloat(document.getElementById(`paymentAmount_${i}`).value);
+                    if (!isNaN(amount)) {
+                        paidTotal += amount;
+                    }
+                }
+            }
+            const unpaidTotal = total - paidTotal;
+            document.getElementById('paidTotal').textContent = `$${paidTotal.toFixed(2)}`;
+            document.getElementById('unpaidTotal').textContent = `$${unpaidTotal.toFixed(2)}`;
+        }
+
+        // 监听总金额变化重新计算
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('totalAmount').addEventListener('input', () => {
+                for (let i = 0; i < 5; i++) {
+                    if (document.getElementById(`paymentPercent_${i}`).value) {
+                        updatePaymentFromPercent(i);
+                    }
+                }
+                updateTotalSummary();
+            });
+        });
+
         function calculateDaysLeft(dateStr) {
             if (!dateStr) return null;
             const today = new Date();
@@ -945,12 +1103,34 @@
             document.getElementById('createDate').value = project.createDate;
             document.getElementById('expectedDate').value = project.expectedDate || '';
             document.getElementById('currentStage').value = project.currentStage || 0;
+            document.getElementById('totalAmount').value = project.totalAmount || '';
             document.getElementById('description').value = project.description || '';
 
             stages.forEach((s, i) => {
                 document.getElementById(`stageDate_${i}`).value = project.stageDates ? (project.stageDates[i] || '') : '';
             });
 
+            // 填充进度款
+            if (project.progressPayments) {
+                project.progressPayments.forEach((p, i) => {
+                    if (p) {
+                        document.getElementById(`paymentPercent_${i}`).value = p.percent || '';
+                        document.getElementById(`paymentAmount_${i}`).value = p.amount || '';
+                        document.getElementById(`paymentNote_${i}`).value = p.note || '';
+                        document.getElementById(`paymentPaid_${i}`).checked = !!p.paid;
+                    }
+                });
+            } else {
+                // 清空
+                for (let i = 0; i < 5; i++) {
+                    document.getElementById(`paymentPercent_${i}`).value = '';
+                    document.getElementById(`paymentAmount_${i}`).value = '';
+                    document.getElementById(`paymentNote_${i}`).value = '';
+                    document.getElementById(`paymentPaid_${i}`).checked = false;
+                }
+            }
+
+            updateTotalSummary();
             document.getElementById('modal').classList.add('show');
         }
 
@@ -968,6 +1148,25 @@
                 stageDates[i] = document.getElementById(`stageDate_${i}`).value || '';
             });
 
+            // 收集进度款
+            const progressPayments = [];
+            for (let i = 0; i < 5; i++) {
+                const percent = document.getElementById(`paymentPercent_${i}`).value;
+                const amount = document.getElementById(`paymentAmount_${i}`).value;
+                const note = document.getElementById(`paymentNote_${i}`).value;
+                const paid = document.getElementById(`paymentPaid_${i}`).checked;
+                if (percent || amount) {
+                    progressPayments.push({
+                        percent: percent ? parseFloat(percent) : null,
+                        amount: amount ? parseFloat(amount) : null,
+                        note: note,
+                        paid: paid
+                    });
+                } else {
+                    progressPayments.push(null);
+                }
+            }
+
             const currentStage = parseInt(document.getElementById('currentStage').value);
             const project = {
                 id: editId ? parseInt(editId) : Date.now(),
@@ -976,8 +1175,10 @@
                 expectedDate: document.getElementById('expectedDate').value,
                 currentStage: currentStage,
                 progress: stages[currentStage].progress,
+                totalAmount: document.getElementById('totalAmount').value ? parseFloat(document.getElementById('totalAmount').value) : null,
                 description: document.getElementById('description').value.trim(),
-                stageDates: stageDates
+                stageDates: stageDates,
+                progressPayments: progressPayments
             };
 
             if (editId) {
@@ -1068,6 +1269,26 @@
 
             container.innerHTML = filtered.map(project => {
                 const stageInfo = stages[project.currentStage];
+
+                // 计算付款统计
+                let paidTotal = 0;
+                let totalPercent = 0;
+                if (project.progressPayments && project.totalAmount) {
+                    project.progressPayments.forEach(p => {
+                        if (p && p.paid && p.amount) {
+                            paidTotal += p.amount;
+                        }
+                        if (p && p.percent) {
+                            totalPercent += p.percent;
+                        }
+                    });
+                }
+
+                let paymentHtml = '';
+                if (project.totalAmount) {
+                    paymentHtml = `| 总额: $${project.totalAmount.toFixed(2)} | 已收: $${paidTotal.toFixed(2)} (${Math.round(totalPercent)}%)`;
+                }
+
                 return `
                     <div class="list-item">
                         <div class="list-info">
@@ -1075,13 +1296,14 @@
                             <div class="list-meta">
                                 当前阶段：${stageInfo.name} | 进度：${stageInfo.progress}% 
                                 ${project.expectedDate ? `| 预期完成：${project.expectedDate}` : ''}
+                                ${paymentHtml}
                             </div>
                         </div>
                         <div class="list-actions">
                             ${project.currentStage > 0 ? `<button class="btn-success" onclick="prevStage(${project.id})">上一阶段</button>` : ''}
                             ${project.currentStage < 6 ? `<button class="btn-success" onclick="nextStage(${project.id})">下一阶段</button>` : ''}
                             <button class="btn-primary" onclick="openLogModal(${project.id})">日志</button>
-                            <button class="btn-primary" onclick="openEditModal(${project})">编辑</button>
+                            <button class="btn-primary" onclick="openEditModal(${project.id})">编辑</button>
                             <button class="btn-danger" onclick="deleteProject(${project.id})">删除</button>
                         </div>
                     </div>
@@ -1151,12 +1373,34 @@
                         let isOverdue = daysLeft !== null && daysLeft < 0;
                         card.className += isOverdue ? ' overdue' : '';
 
+                        // 计算付款统计
+                        let paidTotal = 0;
+                        let totalPercent = 0;
+                        if (project.progressPayments && project.totalAmount) {
+                            project.progressPayments.forEach(p => {
+                                if (p && p.paid && p.amount) {
+                                    paidTotal += p.amount;
+                                }
+                                if (p && p.percent) {
+                                    totalPercent += p.percent;
+                                }
+                            });
+                        }
+
+                        let paymentInfo = '';
+                        if (project.totalAmount) {
+                            paymentInfo = `<div class="card-info" style="margin-top: 4px;">
+                                <span>总额: $${project.totalAmount.toFixed(2)} | 已收: $${paidTotal.toFixed(2)}</span>
+                            </div>`;
+                        }
+
                         card.innerHTML = `
                             <div class="card-title">${escapeHtml(project.name)}</div>
                             <div class="card-info">
                                 <span class="card-stage-date">计划日期：${currentDate || '未设置'}</span>
                                 ${badge}
                             </div>
+                            ${paymentInfo}
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${project.progress}%"></div>
                             </div>
