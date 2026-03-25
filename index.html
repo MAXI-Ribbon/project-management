@@ -330,6 +330,82 @@
             color: #666;
         }
 
+        /* 修改日志弹窗 */
+        .log-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .log-modal.show {
+            display: flex;
+        }
+
+        .log-container {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 70vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .log-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-header h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .log-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .log-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .log-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .log-action {
+            font-weight: 600;
+            color: #1677ff;
+            margin-left: 10px;
+        }
+
+        .log-detail {
+            margin-top: 5px;
+            color: #666;
+        }
+
+        .empty-log {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+        }
+
         @media (max-width: 1024px) {
             .kanban-board {
                 grid-template-columns: 1fr;
@@ -418,6 +494,18 @@
         </div>
     </div>
 
+    <!-- 修改日志弹窗 -->
+    <div class="log-modal" id="logModal">
+        <div class="log-container">
+            <div class="log-header">
+                <h2 id="logModalTitle">修改日志</h2>
+                <button class="close-btn" id="closeLogModal">&times;</button>
+            </div>
+            <div class="log-body" id="logBody">
+            </div>
+        </div>
+    </div>
+
     <script>
         const stages = [
             { id: 0, name: '未开始', progress: 0, status: 'not-started' },
@@ -435,6 +523,32 @@
         };
 
         let draggedProject = null;
+        let currentLogProjectId = null;
+
+        // 获取当前格式化时间
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleString('zh-CN');
+        }
+
+        // 添加日志
+        function addLog(projectId, action, detail) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
+
+            if (!project.logs) {
+                project.logs = [];
+            }
+
+            project.logs.unshift({
+                time: getCurrentTime(),
+                action: action,
+                detail: detail
+            });
+
+            saveProjects(projects);
+        }
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
@@ -453,9 +567,13 @@
             document.getElementById('exportBtn').addEventListener('click', exportData);
             document.getElementById('importFile').addEventListener('change', importJsonData);
             document.getElementById('clearBtn').addEventListener('click', clearAll);
+            document.getElementById('closeLogModal').addEventListener('click', closeLogModal);
 
             document.getElementById('modal').addEventListener('click', (e) => {
                 if (e.target.id === 'modal') closeModal();
+            });
+            document.getElementById('logModal').addEventListener('click', (e) => {
+                if (e.target.id === 'logModal') closeLogModal();
             });
 
             renderBoard();
@@ -505,6 +623,37 @@
             document.getElementById('modal').classList.remove('show');
         }
 
+        function openLogModal(projectId) {
+            currentLogProjectId = projectId;
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
+
+            document.getElementById('logModalTitle').textContent = `修改日志 - ${project.name}`;
+            const logBody = document.getElementById('logBody');
+
+            if (!project.logs || project.logs.length === 0) {
+                logBody.innerHTML = '<div class="empty-log">暂无修改记录</div>';
+            } else {
+                logBody.innerHTML = project.logs.map(log => `
+                    <div class="log-item">
+                        <div>
+                            <span class="log-time">${log.time}</span>
+                            <span class="log-action">${log.action}</span>
+                        </div>
+                        ${log.detail ? `<div class="log-detail">${log.detail}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('logModal').classList.add('show');
+        }
+
+        function closeLogModal() {
+            document.getElementById('logModal').classList.remove('show');
+            currentLogProjectId = null;
+        }
+
         function saveProject() {
             const projects = getProjects();
             const editId = document.getElementById('editId').value;
@@ -525,13 +674,20 @@
                 // 编辑模式
                 project.id = parseInt(editId);
                 const index = projects.findIndex(p => p.id === project.id);
+                // 保留原有日志
+                if (index >= 0 && projects[index].logs) {
+                    project.logs = projects[index].logs;
+                }
                 if (index >= 0) {
                     projects[index] = project;
+                    addLog(project.id, '编辑项目', `修改为 ${stages[project.stage].name}，进度 ${project.progress}%`);
                 }
             } else {
                 // 新增模式
                 project.id = Date.now();
+                project.logs = [];
                 projects.unshift(project);
+                addLog(project.id, '创建项目', `初始阶段 ${stages[project.stage].name}`);
             }
 
             saveProjects(projects);
@@ -571,10 +727,12 @@
             const projects = getProjects();
             const project = projects.find(p => p.id === id);
             if (project && project.stage < 5) {
+                const oldStage = stages[project.stage].name;
                 project.stage += 1;
                 const stageInfo = stages[project.stage];
                 project.progress = stageInfo.progress;
                 project.status = stageInfo.status;
+                addLog(id, '推进阶段', `从 "${oldStage}" → "${stageInfo.name}"`);
                 saveProjects(projects);
                 renderBoard();
             }
@@ -584,10 +742,12 @@
             const projects = getProjects();
             const project = projects.find(p => p.id === id);
             if (project && project.stage > 0) {
+                const oldStage = stages[project.stage].name;
                 project.stage -= 1;
                 const stageInfo = stages[project.stage];
                 project.progress = stageInfo.progress;
                 project.status = stageInfo.status;
+                addLog(id, '回退阶段', `从 "${oldStage}" → "${stageInfo.name}"`);
                 saveProjects(projects);
                 renderBoard();
             }
@@ -676,6 +836,7 @@
                             <div class="card-actions" style="margin-top: 10px;">
                                 ${project.stage > 0 ? `<button class="btn-success" onclick="event.stopPropagation(); prevStage(${project.id})">上一阶段</button>` : ''}
                                 ${project.stage < 5 ? `<button class="btn-success" onclick="event.stopPropagation(); nextStage(${project.id})">下一阶段</button>` : ''}
+                                <button class="btn-primary" onclick="event.stopPropagation(); openLogModal(${project.id})">日志</button>
                                 <button class="btn-primary" onclick="event.stopPropagation(); editProject(${project.id})">编辑</button>
                                 <button class="btn-danger" onclick="event.stopPropagation(); deleteProject(${project.id})">删除</button>
                             </div>
