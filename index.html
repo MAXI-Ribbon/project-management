@@ -406,7 +406,35 @@
             padding: 30px;
         }
 
+        .progress-payments-summary strong {
+            color: #1677ff;
+        }
+
+        .card-payment-info {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .paid-badge {
+            color: #52c41a;
+            font-weight: 600;
+        }
+
+        .unpaid-badge {
+            color: #fa8c16;
+            font-weight: 600;
+        }
+
         @media (max-width: 1024px) {
+            #progressPayments > div {
+                grid-template-columns: 60px 90px 90px 1fr 60px !important;
+                gap: 5px !important;
+            }
+        }
             .kanban-board {
                 grid-template-columns: 1fr;
             }
@@ -481,6 +509,63 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="totalAmount">项目总金额（AUD）</label>
+                        <input type="number" id="totalAmount" step="0.01" placeholder="请输入项目总金额">
+                    </div>
+
+                    <h3 style="margin: 20px 0 10px 0; font-size: 16px; color: #555;">进度款（共5期，输入百分比自动计算金额）</h3>
+                    <div id="progressPayments">
+                        <!-- 进度款1 -->
+                        <div style="display: grid; grid-template-columns: 80px 120px 120px 1fr 80px; gap: 10px; margin-bottom: 10px; align-items: center;">
+                            <label>进度 1</label>
+                            <input type="number" class="progress-percent" min="0" max="100" placeholder="百分比%" onchange="calculateProgressAmount(this)">
+                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
+                            <input type="text" class="progress-note" placeholder="备注">
+                            <label style="margin: 0; text-align: center;"><input type="checkbox" class="progress-paid"> 已付</label>
+                        </div>
+                        <!-- 进度款2 -->
+                        <div style="display: grid; grid-template-columns: 80px 120px 120px 1fr 80px; gap: 10px; margin-bottom: 10px; align-items: center;">
+                            <label>进度 2</label>
+                            <input type="number" class="progress-percent" min="0" max="100" placeholder="百分比%" onchange="calculateProgressAmount(this)">
+                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
+                            <input type="text" class="progress-note" placeholder="备注">
+                            <label style="margin: 0; text-align: center;"><input type="checkbox" class="progress-paid"> 已付</label>
+                        </div>
+                        <!-- 进度款3 -->
+                        <div style="display: grid; grid-template-columns: 80px 120px 120px 1fr 80px; gap: 10px; margin-bottom: 10px; align-items: center;">
+                            <label>进度 3</label>
+                            <input type="number" class="progress-percent" min="0" max="100" placeholder="百分比%" onchange="calculateProgressAmount(this)">
+                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
+                            <input type="text" class="progress-note" placeholder="备注">
+                            <label style="margin: 0; text-align: center;"><input type="checkbox" class="progress-paid"> 已付</label>
+                        </div>
+                        <!-- 进度款4 -->
+                        <div style="display: grid; grid-template-columns: 80px 120px 120px 1fr 80px; gap: 10px; margin-bottom: 10px; align-items: center;">
+                            <label>进度 4</label>
+                            <input type="number" class="progress-percent" min="0" max="100" placeholder="百分比%" onchange="calculateProgressAmount(this)">
+                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
+                            <input type="text" class="progress-note" placeholder="备注">
+                            <label style="margin: 0; text-align: center;"><input type="checkbox" class="progress-paid"> 已付</label>
+                        </div>
+                        <!-- 进度款5 -->
+                        <div style="display: grid; grid-template-columns: 80px 120px 120px 1fr 80px; gap: 10px; margin-bottom: 10px; align-items: center;">
+                            <label>进度 5</label>
+                            <input type="number" class="progress-percent" min="0" max="100" placeholder="百分比%" onchange="calculateProgressAmount(this)">
+                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
+                            <input type="text" class="progress-note" placeholder="备注">
+                            <label style="margin: 0; text-align: center;"><input type="checkbox" class="progress-paid"> 已付</label>
+                        </div>
+                    </div>
+
+                    <div style="background: #f6f8fa; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                            <span>进度款总计：<strong id="progressTotal">0.00</strong> AUD</span>
+                            <span>已付总额：<strong id="paidTotal">0.00</strong> AUD</span>
+                            <span>未付总额：<strong id="unpaidTotal">0.00</strong> AUD</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="description">备注 / 详细信息</label>
                         <textarea id="description" placeholder="输入联系人、详细地址等信息"></textarea>
                     </div>
@@ -549,6 +634,44 @@
             saveProjects(projects);
         }
 
+        // 根据百分比计算进度款金额
+        window.calculateProgressAmount = function(input) {
+            const container = input.closest('#progressPayments');
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
+            updateProgressTotals(totalAmount, container);
+        };
+
+        // 更新所有进度款总额/已付/未付
+        function updateProgressTotals(totalAmount, container) {
+            let progressTotal = 0;
+            let paidTotal = 0;
+            container.querySelectorAll('.progress-percent').forEach((percentInput, idx) => {
+                const percent = parseFloat(percentInput.value) || 0;
+                const amount = (totalAmount * percent / 100);
+                const amountInput = percentInput.parentElement.querySelector('.progress-amount');
+                amountInput.value = amount.toFixed(2);
+                progressTotal += amount;
+                // 如果勾选了已付，加到已付总额
+                const paidCheckbox = percentInput.parentElement.querySelector('.progress-paid');
+                if (paidCheckbox.checked) {
+                    paidTotal += amount;
+                }
+            });
+            document.getElementById('progressTotal').textContent = progressTotal.toFixed(2);
+            document.getElementById('paidTotal').textContent = paidTotal.toFixed(2);
+            document.getElementById('unpaidTotal').textContent = (progressTotal - paidTotal).toFixed(2);
+        }
+
+        // 绑定进度款输入框变化事件
+        function bindProgressPaymentEvents() {
+            document.querySelectorAll('#progressPayments .progress-percent, #progressPayments .progress-paid').forEach(el => {
+                el.addEventListener('change', () => {
+                    const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
+                    updateProgressTotals(totalAmount, document.getElementById('progressPayments'));
+                });
+            });
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             // 设置今天日期
@@ -566,6 +689,13 @@
             document.getElementById('importFile').addEventListener('change', importJsonData);
             document.getElementById('clearBtn').addEventListener('click', clearAll);
             document.getElementById('closeLogModal').addEventListener('click', closeLogModal);
+            // 绑定进度款事件
+            bindProgressPaymentEvents();
+            // 总金额变化时重新计算
+            document.getElementById('totalAmount').addEventListener('input', () => {
+                const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
+                updateProgressTotals(totalAmount, document.getElementById('progressPayments'));
+            });
 
             document.getElementById('modal').addEventListener('click', (e) => {
                 if (e.target.id === 'modal') closeModal();
@@ -619,8 +749,24 @@
             document.getElementById('projectName').value = project.name;
             document.getElementById('createDate').value = project.createDate;
             document.getElementById('expectedDate').value = project.expectedDate || '';
+            document.getElementById('totalAmount').value = project.totalAmount || '';
             document.getElementById('stage').value = project.stage || '0';
             document.getElementById('description').value = project.description || '';
+            
+            // 加载进度款
+            const rows = document.querySelectorAll('#progressPayments > div');
+            (project.progressPayments || []).forEach((pp, idx) => {
+                if (idx >= rows.length) return;
+                const row = rows[idx];
+                row.querySelector('.progress-percent').value = pp.percent || '';
+                row.querySelector('.progress-amount').value = (pp.amount || 0).toFixed(2);
+                row.querySelector('.progress-note').value = pp.note || '';
+                row.querySelector('.progress-paid').checked = pp.paid || false;
+            });
+            // 计算总额
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
+            updateProgressTotals(totalAmount, document.getElementById('progressPayments'));
+
             document.getElementById('modal').classList.add('show');
         }
 
@@ -674,34 +820,81 @@
             const stageIndex = parseInt(document.getElementById('stage').value);
             const stageInfo = stages[stageIndex];
 
+            // 读取进度款数据
+            const progressPayments = [];
+            document.querySelectorAll('#progressPayments > div').forEach((row, idx) => {
+                const percentInput = row.querySelector('.progress-percent');
+                const amountInput = row.querySelector('.progress-amount');
+                const noteInput = row.querySelector('.progress-note');
+                const paidCheckbox = row.querySelector('.progress-paid');
+                const percent = parseFloat(percentInput.value) || 0;
+                const amount = parseFloat(amountInput.value) || 0;
+                progressPayments.push({
+                    index: idx + 1,
+                    percent: percent,
+                    amount: amount,
+                    paid: paidCheckbox.checked,
+                    note: noteInput.value.trim()
+                });
+            });
+
             const project = {
                 name: document.getElementById('projectName').value.trim(),
                 createDate: document.getElementById('createDate').value || new Date().toISOString().split('T')[0],
                 expectedDate: document.getElementById('expectedDate').value,
+                totalAmount: parseFloat(document.getElementById('totalAmount').value) || 0,
                 stage: stageIndex,
                 progress: stageInfo.progress,
                 status: stageInfo.status,
+                progressPayments: progressPayments,
                 description: document.getElementById('description').value.trim()
             };
 
+            // 计算已付/未付总额
+            project.paidTotal = progressPayments.filter(p => p.paid).reduce((sum, p) => sum + p.amount, 0);
+            project.unpaidTotal = progressPayments.reduce((sum, p) => sum + p.amount, 0) - project.paidTotal;
+
             if (editId) {
-                // 编辑模式
+                // 编辑模式：记录所有修改
                 project.id = parseInt(editId);
                 const index = projects.findIndex(p => p.id === project.id);
                 // 保留原有日志
                 if (index >= 0 && projects[index].logs) {
                     project.logs = projects[index].logs;
                 }
+                // 对比修改，记录日志
+                let changes = [];
                 if (index >= 0) {
+                    const oldProject = projects[index];
+                    if ((oldProject.totalAmount || 0) !== project.totalAmount) {
+                        changes.push(`总金额从 ${(oldProject.totalAmount || 0).toFixed(2)} → ${project.totalAmount.toFixed(2)}`);
+                    }
+                    if (oldProject.stage !== project.stage) {
+                        changes.push(`阶段从 ${stages[oldProject.stage].name} → ${stages[project.stage].name}`);
+                    }
+                    // 对比进度款
+                    if (oldProject.progressPayments) {
+                        project.progressPayments.forEach((np, i) => {
+                            const op = oldProject.progressPayments[i];
+                            if (!op) return;
+                            if (np.percent !== op.percent) changes.push(`进度${i+1}百分比: ${op.percent}% → ${np.percent}%`);
+                            if (np.paid !== op.paid) changes.push(`进度${i+1}已付状态: ${op.paid ? '是' : '否'} → ${np.paid ? '是' : '否'}`);
+                        });
+                    }
+                    const changeDetail = changes.length > 0 ? changes.join('；') : '修改项目基础信息';
                     projects[index] = project;
-                    addLog(project.id, '编辑项目', `修改为 ${stages[project.stage].name}，进度 ${project.progress}%`);
+                    addLog(project.id, '编辑项目', changeDetail);
                 }
             } else {
                 // 新增模式
                 project.id = Date.now();
                 project.logs = [];
+                let initDetail = `初始阶段 ${stages[project.stage].name}`;
+                if (project.totalAmount > 0) {
+                    initDetail += `，总金额 ${project.totalAmount.toFixed(2)} AUD`;
+                }
                 projects.unshift(project);
-                addLog(project.id, '创建项目', `初始阶段 ${stages[project.stage].name}`);
+                addLog(project.id, '创建项目', initDetail);
             }
 
             saveProjects(projects);
@@ -728,10 +921,17 @@
             const project = projects.find(p => p.id === id);
             if (project) {
                 const oldStatus = project.status;
+                const oldStage = project.stage;
                 project.status = newStatus;
                 if (newStatus === 'completed') {
                     project.progress = 100;
                     project.stage = 5;
+                } else if (newStatus === 'not-started') {
+                    project.progress = 0;
+                    project.stage = 0;
+                } else if (newStatus === 'in-progress' && project.stage === 0) {
+                    project.progress = 20;
+                    project.stage = 1;
                 }
                 addLog(id, '拖放改变状态', `从 ${statusConfig[oldStatus].name} → ${statusConfig[newStatus].name}`);
                 saveProjects(projects);
@@ -839,6 +1039,17 @@
                                 <div class="card-info" style="display: block; margin-top: 8px; white-space: pre-line;">
                                     ${escapeHtml(project.description)}
                                 </div>
+                            ` : ''}
+                            ${project.totalAmount > 0 ? `
+                            <div class="card-payment-info">
+                                <span>项目总金额：<strong>${project.totalAmount.toFixed(2)} AUD</strong></span>
+                                <span>已付总额：<span class="paid-badge">${(project.paidTotal || 0).toFixed(2)} AUD</span> | 未付总额：<span class="unpaid-badge">${(project.unpaidTotal || 0).toFixed(2)} AUD</span></span>
+                                <div style="margin-top: 4px; font-size: 11px;">
+                                    ${(project.progressPayments || []).filter(p => p.percent > 0).map(p => 
+                                        `进度${p.index} ${p.percent}% → ${p.amount.toFixed(2)} AUD ${p.paid ? '✅ 已付' : '⏳ 未付'}${p.note ? ` (${p.note})` : ''}`
+                                    ).join(' · ')}
+                                </div>
+                            </div>
                             ` : ''}
                             <div class="card-progress">
                                 <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
