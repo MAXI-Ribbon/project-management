@@ -551,37 +551,7 @@
             padding: 30px;
         }
 
-        /* 临时工作 */
-        .temp-item {
-            background: #fafafa;
-            border: 1px solid #e8e8e8;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 8px;
-        }
-
-        .temp-item-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .temp-item-meta {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 6px;
-        }
-
-        .temp-item-actions {
-            text-align: right;
-        }
-
-        .temp-item-actions button {
-            padding: 3px 8px;
-            font-size: 12px;
-        }
-
-        /* === 进度款样式 === */
+        /* 进度款样式 */
         .progress-payment-item {
             display: grid;
             grid-template-columns: 80px 100px 100px 1fr auto;
@@ -616,18 +586,34 @@
             margin: 0;
         }
 
-        @media (max-width: 600px) {
-            .progress-payment-item {
-                grid-template-columns: 1fr 1fr;
-            }
+        /* 临时工作 */
+        .temp-item {
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
         }
 
-        .payment-summary {
-            margin-top: 8px;
-            padding: 8px;
-            background: #f5f5f5;
-            border-radius: 4px;
-            font-size: 13px;
+        .temp-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .temp-item-meta {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .temp-item-actions {
+            text-align: right;
+        }
+
+        .temp-item-actions button {
+            padding: 3px 8px;
+            font-size: 12px;
         }
 
         @media (max-width: 1600px) {
@@ -647,6 +633,12 @@
                 width: 100%;
                 order: 3;
                 justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .progress-payment-item {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -729,11 +721,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="currentStage">当前所处阶段</label>
-                        <select id="currentStage"></select>
-                    </div>
-
-                    <div class="form-group">
                         <label for="totalAmount">项目总金额 ($)</label>
                         <input type="number" id="totalAmount" step="0.01" placeholder="输入项目总金额">
                     </div>
@@ -753,6 +740,11 @@
                                 <strong id="unpaidTotal" style="color: #cf1322;">$0.00</strong>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="currentStage">当前所处阶段</label>
+                        <select id="currentStage"></select>
                     </div>
 
                     <div class="form-group">
@@ -826,9 +818,10 @@
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
-            // 设置今天日期
+            // 设置今天日期（修复时区偏移）
             const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
+            // 修复时区偏移：获取本地日期正确的ISO字符串
+            const todayStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
             currentCalendar.year = today.getFullYear();
             currentCalendar.month = today.getMonth();
 
@@ -922,10 +915,6 @@
             // 设置默认创建日期
             document.getElementById('createDate').value = todayStr;
 
-            switchPage();
-            renderCurrentPage();
-            renderCalendar();
-
             // 监听总金额变化重新计算
             document.getElementById('totalAmount').addEventListener('input', () => {
                 for (let i = 0; i < 5; i++) {
@@ -935,6 +924,10 @@
                 }
                 updateTotalSummary();
             });
+
+            switchPage();
+            renderCurrentPage();
+            renderCalendar();
         });
 
         function switchPage() {
@@ -963,20 +956,37 @@
             }
         }
 
-        // === 数据存取 ===
+        // === 数据存取 带容错 ===
         function getProjects() {
-            const projects = localStorage.getItem('projects');
-            const parsed = projects ? JSON.parse(projects) : [];
-            parsed.forEach(project => {
-                if (!project.logs) project.logs = [];
-                if (!project.stageDates) project.stageDates = {};
-            });
-            return parsed;
+            try {
+                const stored = localStorage.getItem('projects');
+                if (!stored) return [];
+                const parsed = JSON.parse(stored);
+                if (!Array.isArray(parsed)) return [];
+                // 确保每个项目都有必要字段
+                parsed.forEach(project => {
+                    if (!project.logs) project.logs = [];
+                    if (!project.stageDates) project.stageDates = {};
+                    if (!project.progressPayments) project.progressPayments = [];
+                });
+                return parsed;
+            } catch (err) {
+                console.error('Failed to parse projects from localStorage:', err);
+                return [];
+            }
         }
 
         function getTempWorks() {
-            const temp = localStorage.getItem('tempWorks');
-            return temp ? JSON.parse(temp) : [];
+            try {
+                const stored = localStorage.getItem('tempWorks');
+                if (!stored) return [];
+                const parsed = JSON.parse(stored);
+                if (!Array.isArray(parsed)) return [];
+                return parsed;
+            } catch (err) {
+                console.error('Failed to parse tempWorks from localStorage:', err);
+                return [];
+            }
         }
 
         function saveProjects(projects) {
@@ -992,43 +1002,6 @@
             const now = new Date();
             return now.toLocaleString('zh-CN');
         }
-
-        // === 进度款计算 ===
-        function updatePaymentFromPercent(index) {
-            const total = parseFloat(document.getElementById('totalAmount').value);
-            const percent = parseFloat(document.getElementById(`paymentPercent_${index}`).value);
-            if (!isNaN(total) && !isNaN(percent)) {
-                const amount = (total * percent / 100);
-                document.getElementById(`paymentAmount_${index}`).value = amount.toFixed(2);
-            }
-        }
-
-        function updatePaymentFromAmount(index) {
-            const total = parseFloat(document.getElementById('totalAmount').value);
-            const amount = parseFloat(document.getElementById(`paymentAmount_${index}`).value);
-            if (!isNaN(total) && total > 0 && !isNaN(amount)) {
-                const percent = (amount / total * 100);
-                document.getElementById(`paymentPercent_${index}`).value = percent.toFixed(1);
-            }
-        }
-
-        function updateTotalSummary() {
-            const total = parseFloat(document.getElementById('totalAmount').value) || 0;
-            let paidTotal = 0;
-            for (let i = 0; i < 5; i++) {
-                if (document.getElementById(`paymentPaid_${i}`).checked) {
-                    const amount = parseFloat(document.getElementById(`paymentAmount_${i}`).value);
-                    if (!isNaN(amount)) {
-                        paidTotal += amount;
-                    }
-                }
-            }
-            const unpaidTotal = total - paidTotal;
-            document.getElementById('paidTotal').textContent = `$${paidTotal.toFixed(2)}`;
-            document.getElementById('unpaidTotal').textContent = `$${unpaidTotal.toFixed(2)}`;
-        }
-
-
 
         function calculateDaysLeft(dateStr) {
             if (!dateStr) return null;
@@ -1082,28 +1055,73 @@
             document.getElementById('logModal').classList.remove('show');
         }
 
+        // === 进度款计算 ===
+        function updatePaymentFromPercent(index) {
+            const total = parseFloat(document.getElementById('totalAmount').value);
+            const percent = parseFloat(document.getElementById(`paymentPercent_${index}`).value);
+            if (!isNaN(total) && !isNaN(percent)) {
+                const amount = (total * percent / 100);
+                document.getElementById(`paymentAmount_${index}`).value = amount.toFixed(2);
+            }
+        }
+
+        function updatePaymentFromAmount(index) {
+            const total = parseFloat(document.getElementById('totalAmount').value);
+            const amount = parseFloat(document.getElementById(`paymentAmount_${index}`).value);
+            if (!isNaN(total) && total > 0 && !isNaN(amount)) {
+                const percent = (amount / total * 100);
+                document.getElementById(`paymentPercent_${index}`).value = percent.toFixed(1);
+            }
+        }
+
+        function updateTotalSummary() {
+            const total = parseFloat(document.getElementById('totalAmount').value) || 0;
+            let paidTotal = 0;
+            for (let i = 0; i < 5; i++) {
+                if (document.getElementById(`paymentPaid_${i}`).checked) {
+                    const amount = parseFloat(document.getElementById(`paymentAmount_${i}`).value);
+                    if (!isNaN(amount)) {
+                        paidTotal += amount;
+                    }
+                }
+            }
+            const unpaidTotal = total - paidTotal;
+            document.getElementById('paidTotal').textContent = `$${paidTotal.toFixed(2)}`;
+            document.getElementById('unpaidTotal').textContent = `$${unpaidTotal.toFixed(2)}`;
+        }
+
         // === 弹窗操作 ===
         function openAddModal() {
             document.getElementById('modalTitle').textContent = '添加新项目';
             document.getElementById('projectForm').reset();
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('createDate').value = today;
+            const today = new Date();
+            const todayStr = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            document.getElementById('createDate').value = todayStr;
             document.getElementById('editId').value = '';
             stages.forEach((s, i) => {
                 document.getElementById(`stageDate_${i}`).value = '';
+                document.getElementById(`paymentPercent_${i}`).value = '';
+                document.getElementById(`paymentAmount_${i}`).value = '';
+                document.getElementById(`paymentNote_${i}`).value = '';
+                document.getElementById(`paymentPaid_${i}`).checked = false;
             });
             document.getElementById('currentStage').value = '0';
+            updateTotalSummary();
             document.getElementById('modal').classList.add('show');
         }
 
-        function openEditModal(project) {
+        function openEditModal(projectId) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
+
             document.getElementById('modalTitle').textContent = '编辑项目';
             document.getElementById('editId').value = project.id;
             document.getElementById('projectName').value = project.name;
             document.getElementById('createDate').value = project.createDate;
             document.getElementById('expectedDate').value = project.expectedDate || '';
-            document.getElementById('currentStage').value = project.currentStage || 0;
             document.getElementById('totalAmount').value = project.totalAmount || '';
+            document.getElementById('currentStage').value = project.currentStage || 0;
             document.getElementById('description').value = project.description || '';
 
             stages.forEach((s, i) => {
@@ -1118,19 +1136,15 @@
                         document.getElementById(`paymentAmount_${i}`).value = p.amount || '';
                         document.getElementById(`paymentNote_${i}`).value = p.note || '';
                         document.getElementById(`paymentPaid_${i}`).checked = !!p.paid;
+                    } else {
+                        document.getElementById(`paymentPercent_${i}`).value = '';
+                        document.getElementById(`paymentAmount_${i}`).value = '';
+                        document.getElementById(`paymentNote_${i}`).value = '';
+                        document.getElementById(`paymentPaid_${i}`).checked = false;
                     }
                 });
-            } else {
-                // 清空
-                for (let i = 0; i < 5; i++) {
-                    document.getElementById(`paymentPercent_${i}`).value = '';
-                    document.getElementById(`paymentAmount_${i}`).value = '';
-                    document.getElementById(`paymentNote_${i}`).value = '';
-                    document.getElementById(`paymentPaid_${i}`).checked = false;
-                }
             }
 
-            // 触发一次计算更新
             updateTotalSummary();
             document.getElementById('modal').classList.add('show');
         }
@@ -1374,16 +1388,12 @@
                         let isOverdue = daysLeft !== null && daysLeft < 0;
                         card.className += isOverdue ? ' overdue' : '';
 
-                        // 计算付款统计
+                        // 计算付款信息
                         let paidTotal = 0;
-                        let totalPercent = 0;
                         if (project.progressPayments && project.totalAmount) {
                             project.progressPayments.forEach(p => {
                                 if (p && p.paid && p.amount) {
                                     paidTotal += p.amount;
-                                }
-                                if (p && p.percent) {
-                                    totalPercent += p.percent;
                                 }
                             });
                         }
@@ -1398,25 +1408,27 @@
                         card.innerHTML = `
                             <div class="card-title">${escapeHtml(project.name)}</div>
                             <div class="card-info">
-                                <span class="card-stage-date">计划日期：${currentDate || '未设置'}</span>
-                                ${badge}
+                                <span>阶段：${stage.name}</span>
+                                ${currentDate ? `<span class="card-stage-date">${currentDate}</span>` : ''}
+                            </div>
+                            ${badge}
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${stage.progress}%"></div>
                             </div>
                             ${paymentInfo}
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${project.progress}%"></div>
-                            </div>
                             <div class="card-actions">
-                                ${project.currentStage > 0 ? `<button class="btn-success" onclick="event.stopPropagation(); prevStage(${project.id})">上一阶段</button>` : ''}
-                                ${project.currentStage < 6 ? `<button class="btn-success" onclick="event.stopPropagation(); nextStage(${project.id})">下一阶段</button>` : ''}
-                                <button class="btn-primary" onclick="event.stopPropagation(); openLogModal(${project.id})">日志</button>
-                                <button class="btn-primary" onclick="event.stopPropagation(); openEditModal(${project.id})">编辑</button>
-                                <button class="btn-danger" onclick="event.stopPropagation(); deleteProject(${project.id})">删除</button>
+                                ${project.currentStage > 0 ? `<button class="btn-success" onclick="prevStage(${project.id})">上一阶段</button>` : ''}
+                                ${project.currentStage < 6 ? `<button class="btn-success" onclick="nextStage(${project.id})">下一阶段</button>` : ''}
+                                <button class="btn-primary" onclick="openLogModal(${project.id})">日志</button>
+                                <button class="btn-primary" onclick="openEditModal(${project.id})">编辑</button>
+                                <button class="btn-danger" onclick="deleteProject(${project.id})">删除</button>
                             </div>
                         `;
-
-                        card.addEventListener('dragstart', () => {
+                        // 拖拽事件
+                        card.addEventListener('dragstart', (e) => {
                             draggedProject = project;
                             card.classList.add('dragging');
+                            e.dataTransfer.effectAllowed = 'move';
                         });
                         card.addEventListener('dragend', () => {
                             draggedProject = null;
@@ -1427,8 +1439,11 @@
                     });
                 }
 
-                column.addEventListener('dragover', e => e.preventDefault());
-                column.addEventListener('drop', e => {
+                // 放置目标
+                column.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                column.addEventListener('drop', (e) => {
                     e.preventDefault();
                     if (draggedProject && draggedProject.currentStage !== stage.id) {
                         moveToStage(draggedProject.id, stage.id);
@@ -1440,6 +1455,88 @@
         }
 
         // === 日历视图 ===
+        function renderCalendar() {
+            const { year, month } = currentCalendar;
+            document.getElementById('calendarMonth').textContent = `${year}年 ${month + 1}月`;
+
+            const today = new Date();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDayOfWeek = firstDay.getDay(); // 0 = 周日
+            const daysInMonth = lastDay.getDate();
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            // 星期表头
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            weekdays.forEach(w => {
+                const div = document.createElement('div');
+                div.className = 'calendar-weekday';
+                div.textContent = w;
+                grid.appendChild(div);
+            });
+
+            // 上个月填充
+            const prevLastDay = new Date(year, month, 0).getDate();
+            for (let i = 0; i < startDayOfWeek; i++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day other-month';
+                div.innerHTML = `<div class="day-number">${prevLastDay - (startDayOfWeek - i - 1)}</div>`;
+                grid.appendChild(div);
+            }
+
+            // 当月天数
+            const projects = getProjects();
+            const tempWorks = getTempWorks();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
+                let classes = 'calendar-day';
+                if (date.getFullYear() === today.getFullYear() &&
+                    date.getMonth() === today.getMonth() &&
+                    date.getDate() === today.getDate()) {
+                    classes += ' today';
+                }
+
+                const div = document.createElement('div');
+                div.className = classes;
+                div.innerHTML = `<div class="day-number">${day}<button class="add-temp-btn" onclick="openAddTempWork('${dateStr}')">+</button></div>`;
+
+                // 获取当天项目（预期完成日期是今天的）
+                const dayProjects = projects.filter(p => p.expectedDate === dateStr);
+                dayProjects.forEach(p => {
+                    const ev = document.createElement('div');
+                    ev.className = 'calendar-event project';
+                    ev.textContent = p.name;
+                    ev.onclick = () => openEditModal(p.id);
+                    div.appendChild(ev);
+                });
+
+                // 获取当天临时工作
+                const dayTemps = tempWorks.filter(t => t.date === dateStr);
+                dayTemps.forEach(t => {
+                    const ev = document.createElement('div');
+                    ev.className = 'calendar-event temp';
+                    ev.textContent = t.title;
+                    ev.onclick = () => openTempDetail(t);
+                    div.appendChild(ev);
+                });
+
+                grid.appendChild(div);
+            }
+
+            // 下个月填充
+            const daysNeeded = 42 - (startDayOfWeek + daysInMonth);
+            for (let i = 1; i <= daysNeeded; i++) {
+                const div = document.createElement('div');
+                div.className = 'calendar-day other-month';
+                div.innerHTML = `<div class="day-number">${i}</div>`;
+                grid.appendChild(div);
+            }
+        }
+
         function prevMonth() {
             currentCalendar.month--;
             if (currentCalendar.month < 0) {
@@ -1458,102 +1555,11 @@
             renderCalendar();
         }
 
-        function renderCalendar() {
-            const { year, month } = currentCalendar;
-            const projects = getProjects();
-            const tempWorks = getTempWorks();
-
-            document.getElementById('calendarMonth').textContent = `${year}年 ${month + 1}月`;
-
-            // 计算当月第一天
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const startDayOfWeek = firstDay.getDay(); // 0-6, 0周日
-            const today = new Date();
-            const isToday = (y, m, d) => y === today.getFullYear() && m === today.getMonth() && d === today.getDate();
-
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-
-            // 星期表头
-            ['日', '一', '二', '三', '四', '五', '六'].forEach(day => {
-                const el = document.createElement('div');
-                el.className = 'calendar-weekday';
-                el.textContent = day;
-                grid.appendChild(el);
-            });
-
-            // 前面补上月的空白
-            for (let i = 0; i < startDayOfWeek; i++) {
-                const el = document.createElement('div');
-                el.className = 'calendar-day other-month';
-                grid.appendChild(el);
-            }
-
-            // 生成日期格子
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const el = document.createElement('div');
-                el.className = 'calendar-day';
-                if (isToday(year, month, day)) {
-                    el.classList.add('today');
-                }
-                if (year !== currentCalendar.year || (year === currentCalendar.year && month !== currentCalendar.month)) {
-                    el.classList.add('other-month');
-                }
-
-                el.innerHTML = `
-                    <div class="day-number">
-                        ${day}
-                        <button class="add-temp-btn" onclick="openAddTemp('${dateStr}')">+</button>
-                    </div>
-                    <div class="day-events"></div>
-                `;
-
-                // 收集今天当前阶段日期匹配的项目
-                const todayProjects = projects.filter(p => {
-                    if (!p.stageDates) return false;
-                    return p.stageDates[p.currentStage] === dateStr;
-                });
-
-                const todayTemps = tempWorks.filter(t => t.date === dateStr);
-
-                todayProjects.forEach(p => {
-                    const ev = document.createElement('div');
-                    ev.className = 'calendar-event project';
-                    ev.textContent = p.name;
-                    ev.onclick = () => openEditModal(p);
-                    el.querySelector('.day-events').appendChild(ev);
-                });
-
-                todayTemps.forEach(t => {
-                    const ev = document.createElement('div');
-                    ev.className = 'calendar-event temp';
-                    ev.textContent = t.title;
-                    ev.onclick = () => editTempWork(t.id);
-                    el.querySelector('.day-events').appendChild(ev);
-                });
-
-                grid.appendChild(el);
-            }
-
-            // 补后面下个月的空白
-            const totalCells = startDayOfWeek + lastDay.getDate();
-            const remaining = 7 - (totalCells % 7);
-            if (remaining < 7) {
-                for (let i = 0; i < remaining; i++) {
-                    const el = document.createElement('div');
-                    el.className = 'calendar-day other-month';
-                    grid.appendChild(el);
-                }
-            }
-        }
-
-        function openAddTemp(dateStr) {
+        // === 临时工作 ===
+        function openAddTempWork(dateStr) {
             pendingTempDate = dateStr;
             document.getElementById('tempDate').value = dateStr;
             document.getElementById('tempForm').reset();
-            document.getElementById('tempModalTitle').textContent = `添加临时工作 - ${dateStr}`;
             document.getElementById('tempModal').classList.add('show');
         }
 
@@ -1563,8 +1569,7 @@
         }
 
         function saveTempWork() {
-            const tempWorks = getTempWorks();
-            const date = document.getElementById('tempDate').value;
+            const dateStr = document.getElementById('tempDate').value;
             const title = document.getElementById('tempTitle').value.trim();
             const note = document.getElementById('tempNote').value.trim();
 
@@ -1573,115 +1578,127 @@
                 return;
             }
 
-            const temp = {
+            const tempWorks = getTempWorks();
+            tempWorks.push({
                 id: Date.now(),
-                date: date,
+                date: dateStr,
                 title: title,
                 note: note,
-                createTime: getCurrentTime()
-            };
-
-            tempWorks.unshift(temp);
+                createdAt: getCurrentTime()
+            });
             saveTempWorks(tempWorks);
             closeTempModal();
             renderCalendar();
         }
 
-        function editTempWork(id) {
-            const tempWorks = getTempWorks();
-            const temp = tempWorks.find(t => t.id === id);
-            if (!temp) return;
-
-            if (confirm(`确定要删除临时工作：${temp.title} 吗？`)) {
-                const newList = tempWorks.filter(t => t.id !== id);
-                saveTempWorks(newList);
+        function openTempDetail(t) {
+            let msg = `临时工作：${t.title}\n`;
+            if (t.note) msg += `\n备注：${t.note}\n`;
+            msg += `\n创建于：${t.createdAt}`;
+            msg += `\n\n是否删除？`;
+            if (confirm(msg)) {
+                const tempWorks = getTempWorks().filter(work => work.id !== t.id);
+                saveTempWorks(tempWorks);
                 renderCalendar();
             }
         }
 
-        // === 导入导出 ===
+        // === 导出导入 ===
         function exportData() {
             const data = {
                 projects: getProjects(),
-                tempWorks: getTempWorks()
+                tempWorks: getTempWorks(),
+                exportTime: getCurrentTime()
             };
-            const dataStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'project-management-backup.json';
+            a.download = `project-management-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-        function importJsonData(e) {
-            const file = e.target.files[0];
+        function importJsonData(event) {
+            const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function(e) {
                 try {
-                    const imported = JSON.parse(event.target.result);
-                    if (imported.projects && Array.isArray(imported.projects)) {
-                        if (!confirm(`确认导入 ${imported.projects.length} 个项目？会覆盖现有数据。`)) return;
-                        saveProjects(imported.projects);
-                        if (imported.tempWorks && Array.isArray(imported.tempWorks)) {
-                            saveTempWorks(imported.tempWorks);
-                        }
-                        renderCurrentPage();
-                        updateStats();
-                        alert(`导入成功！共 ${imported.projects.length} 个项目`);
-                    } else if (Array.isArray(imported)) {
-                        // 兼容旧格式
-                        if (!confirm(`确认导入 ${imported.length} 个项目？会覆盖现有数据。`)) return;
-                        saveProjects(imported);
-                        renderCurrentPage();
-                        updateStats();
-                        alert(`导入成功！共 ${imported.length} 个项目`);
-                    } else {
-                        alert('格式不正确');
+                    const content = e.target.result;
+                    const data = JSON.parse(content);
+
+                    let projects = [];
+                    let tempWorks = [];
+
+                    if (Array.isArray(data)) {
+                        // 兼容旧格式只有项目数组
+                        projects = data;
+                    } else if (data && typeof data === 'object') {
+                        // 新格式带projects和tempWorks
+                        projects = data.projects || [];
+                        tempWorks = data.tempWorks || [];
                     }
-                    e.target.value = '';
+
+                    if (!Array.isArray(projects)) projects = [];
+                    if (!Array.isArray(tempWorks)) tempWorks = [];
+
+                    // 补全每个项目的默认字段
+                    projects.forEach(project => {
+                        if (!project.logs) project.logs = [];
+                        if (!project.stageDates) project.stageDates = {};
+                        if (!project.progressPayments) project.progressPayments = [];
+                    });
+
+                    if (!confirm(`确认导入？\n项目数量：${projects.length}\n临时工作：${tempWorks.length}\n这会覆盖现有数据！`)) {
+                        return;
+                    }
+
+                    saveProjects(projects);
+                    saveTempWorks(tempWorks);
+                    renderCurrentPage();
+                    updateStats();
+                    alert('导入成功！');
+                    event.target.value = '';
                 } catch (err) {
-                    alert('导入失败：' + err.message);
+                    console.error('Import failed:', err);
+                    alert('导入失败：文件格式不正确\n' + err.message);
                 }
             };
             reader.readAsText(file);
         }
 
         function clearAll() {
-            if (!confirm('确定要清空所有项目和临时工作吗？此操作不可恢复！')) return;
-            localStorage.removeItem('projects');
-            localStorage.removeItem('tempWorks');
+            if (!confirm('确定要清空所有数据吗？此操作不可恢复！')) return;
+            localStorage.clear();
             renderCurrentPage();
             updateStats();
+            renderCalendar();
+            alert('已清空所有数据');
         }
 
-        // === 统计 ===
+        // === 统计信息 ===
         function updateStats() {
             const projects = getProjects();
             const total = projects.length;
-            const counts = stages.map(() => 0);
-            projects.forEach(p => counts[p.currentStage]++);
-            const completed = counts[6];
-            const todo = total - completed;
+            const completed = projects.filter(p => p.currentStage === 6).length;
             document.getElementById('stats').innerHTML = `
-                总计: ${total} | 进行中: ${todo} | 已交付: ${completed}
+                <span>总数：${total}</span>
+                <span>待完成：${total - completed}</span>
+                <span>已完成：${completed}</span>
             `;
         }
 
-        // === HTML转义 ===
+        // === HTML转义防止XSS ===
         function escapeHtml(text) {
             if (!text) return '';
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return String(text).replace(/[&<>"]/g, m => map[m]);
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>
