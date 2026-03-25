@@ -424,27 +424,6 @@
             color: #999;
             padding: 30px;
         }
-
-        @media (max-width: 1600px) {
-            .kanban-board {
-                grid-template-columns: repeat(3, minmax(260px, 1fr));
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .kanban-board {
-                grid-template-columns: 1fr;
-            }
-            #progressPayments > div {
-                grid-template-columns: 60px 90px 90px 1fr 60px !important;
-                gap: 5px !important;
-            }
-            .stats {
-                width: 100%;
-                order: 3;
-                justify-content: space-between;
-            }
-        }
     </style>
 </head>
 <body>
@@ -500,8 +479,7 @@
                             <option value="2">3. 量尺</option>
                             <option value="3">4. 排产</option>
                             <option value="4">5. 画图</option>
-                            <option value="5">6. 对图</option>
-                            <option value="6">7. Delivered</option>
+                            <option value="5">6. 对图/交付</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -589,8 +567,7 @@ const stages = [
     { name: '3. 量尺',      progress: 40, status: 'in-progress' },
     { name: '4. 排产',      progress: 60, status: 'in-progress' },
     { name: '5. 画图',      progress: 80, status: 'in-progress' },
-    { name: '6. 对图',      progress: 90, status: 'review' },
-    { name: '7. Delivered', progress: 100, status: 'completed' }
+    { name: '6. 对图',      progress: 100, status: 'completed' }
 ];
 
 const stageNames = stages.map(s => s.name);
