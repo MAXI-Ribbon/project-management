@@ -627,12 +627,21 @@
             currentLogProjectId = projectId;
             const projects = getProjects();
             const project = projects.find(p => p.id === projectId);
-            if (!project) return;
+            if (!project) {
+                alert('找不到项目');
+                return;
+            }
+
+            // 确保logs数组存在
+            if (!project.logs) {
+                project.logs = [];
+                saveProjects(projects);
+            }
 
             document.getElementById('logModalTitle').textContent = `修改日志 - ${project.name}`;
             const logBody = document.getElementById('logBody');
 
-            if (!project.logs || project.logs.length === 0) {
+            if (project.logs.length === 0) {
                 logBody.innerHTML = '<div class="empty-log">暂无修改记录</div>';
             } else {
                 logBody.innerHTML = project.logs.map(log => `
@@ -641,7 +650,7 @@
                             <span class="log-time">${log.time}</span>
                             <span class="log-action">${log.action}</span>
                         </div>
-                        ${log.detail ? `<div class="log-detail">${log.detail}</div>` : ''}
+                        ${log.detail ? `<div class="log-detail">${escapeHtml(log.detail)}</div>` : ''}
                     </div>
                 `).join('');
             }
