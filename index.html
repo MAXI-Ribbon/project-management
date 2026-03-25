@@ -812,9 +812,9 @@
         ];
 
         let draggedProject = null;
-        let currentLogProjectId = null;
         let currentCalendar = { year: null, month: null };
         let pendingTempDate = null;
+        let pendingTempEditId = null;
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
@@ -1128,21 +1128,23 @@
                 document.getElementById(`stageDate_${i}`).value = project.stageDates ? (project.stageDates[i] || '') : '';
             });
 
-            // 填充进度款
-            if (project.progressPayments) {
-                project.progressPayments.forEach((p, i) => {
-                    if (p) {
-                        document.getElementById(`paymentPercent_${i}`).value = p.percent || '';
-                        document.getElementById(`paymentAmount_${i}`).value = p.amount || '';
-                        document.getElementById(`paymentNote_${i}`).value = p.note || '';
-                        document.getElementById(`paymentPaid_${i}`).checked = !!p.paid;
-                    } else {
-                        document.getElementById(`paymentPercent_${i}`).value = '';
-                        document.getElementById(`paymentAmount_${i}`).value = '';
-                        document.getElementById(`paymentNote_${i}`).value = '';
-                        document.getElementById(`paymentPaid_${i}`).checked = false;
-                    }
-                });
+            // 填充进度款 - 遍历全部5个索引，确保彻底清空残留
+            for (let i = 0; i < 5; i++) {
+                let p = null;
+                if (project.progressPayments && i < project.progressPayments.length) {
+                    p = project.progressPayments[i];
+                }
+                if (p) {
+                    document.getElementById(`paymentPercent_${i}`).value = p.percent || '';
+                    document.getElementById(`paymentAmount_${i}`).value = p.amount || '';
+                    document.getElementById(`paymentNote_${i}`).value = p.note || '';
+                    document.getElementById(`paymentPaid_${i}`).checked = !!p.paid;
+                } else {
+                    document.getElementById(`paymentPercent_${i}`).value = '';
+                    document.getElementById(`paymentAmount_${i}`).value = '';
+                    document.getElementById(`paymentNote_${i}`).value = '';
+                    document.getElementById(`paymentPaid_${i}`).checked = false;
+                }
             }
 
             updateTotalSummary();
@@ -1558,18 +1560,31 @@
         // === 临时工作 ===
         function openAddTempWork(dateStr) {
             pendingTempDate = dateStr;
+            pendingTempEditId = null;
             document.getElementById('tempDate').value = dateStr;
+            document.getElementById('tempModalTitle').textContent = `添加当日临时工作`;
             document.getElementById('tempForm').reset();
+            document.getElementById('tempModal').classList.add('show');
+        }
+
+        function openEditTempWork(t) {
+            pendingTempEditId = t.id;
+            pendingTempDate = t.date;
+            document.getElementById('tempDate').value = t.date;
+            document.getElementById('tempTitle').value = t.title;
+            document.getElementById('tempNote').value = t.note || '';
+            document.getElementById('tempModalTitle').textContent = `编辑临时工作`;
             document.getElementById('tempModal').classList.add('show');
         }
 
         function closeTempModal() {
             document.getElementById('tempModal').classList.remove('show');
             pendingTempDate = null;
+            pendingTempEditId = null;
         }
 
         function saveTempWork() {
-            const dateStr = document.getElementById('tempDate').value;
+            const dateStr = document.getElementById('tempDate').value.trim();
             const title = document.getElementById('tempTitle').value.trim();
             const note = document.getElementById('tempNote').value.trim();
 
@@ -1578,28 +1593,65 @@
                 return;
             }
 
+            // 校验日期格式 (YYYY-MM-DD)
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                alert('日期格式无效，请使用 YYYY-MM-DD 格式');
+                return;
+            }
+
+            // 校验日期是否合法
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
+                alert('日期无效，请检查');
+                return;
+            }
+
             const tempWorks = getTempWorks();
-            tempWorks.push({
-                id: Date.now(),
-                date: dateStr,
-                title: title,
-                note: note,
-                createdAt: getCurrentTime()
-            });
+
+            if (pendingTempEditId !== null) {
+                // 编辑已有
+                const index = tempWorks.findIndex(t => t.id === pendingTempEditId);
+                if (index >= 0) {
+                    tempWorks[index].date = dateStr;
+                    tempWorks[index].title = title;
+                    tempWorks[index].note = note;
+                    tempWorks[index].updatedAt = getCurrentTime();
+                }
+            } else {
+                // 新建
+                tempWorks.push({
+                    id: Date.now(),
+                    date: dateStr,
+                    title: title,
+                    note: note,
+                    createdAt: getCurrentTime()
+                });
+            }
+
             saveTempWorks(tempWorks);
             closeTempModal();
             renderCalendar();
         }
 
         function openTempDetail(t) {
+            // 弹出选项：编辑/删除
             let msg = `临时工作：${t.title}\n`;
+            msg += `日期：${t.date}\n`;
             if (t.note) msg += `\n备注：${t.note}\n`;
             msg += `\n创建于：${t.createdAt}`;
-            msg += `\n\n是否删除？`;
+            if (t.updatedAt) msg += `\n修改于：${t.updatedAt}`;
+            msg += `\n\n请选择操作：\n确定 → 编辑\n取消 → 删除`;
+
             if (confirm(msg)) {
-                const tempWorks = getTempWorks().filter(work => work.id !== t.id);
-                saveTempWorks(tempWorks);
-                renderCalendar();
+                // 确定 → 编辑
+                openEditTempWork(t);
+            } else {
+                // 取消 → 删除
+                if (confirm('确定要删除这条临时工作吗？')) {
+                    const tempWorks = getTempWorks().filter(work => work.id !== t.id);
+                    saveTempWorks(tempWorks);
+                    renderCalendar();
+                }
             }
         }
 
