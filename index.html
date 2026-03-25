@@ -581,7 +581,14 @@
 
         function getProjects() {
             const projects = localStorage.getItem('projects');
-            return projects ? JSON.parse(projects) : [];
+            const parsed = projects ? JSON.parse(projects) : [];
+            // 确保每个项目都有logs数组
+            parsed.forEach(project => {
+                if (!project.logs) {
+                    project.logs = [];
+                }
+            });
+            return parsed;
         }
 
         function saveProjects(projects) {
@@ -722,11 +729,13 @@
             const projects = getProjects();
             const project = projects.find(p => p.id === id);
             if (project) {
+                const oldStatus = project.status;
                 project.status = newStatus;
                 if (newStatus === 'completed') {
                     project.progress = 100;
                     project.stage = 5;
                 }
+                addLog(id, '拖放改变状态', `从 ${statusConfig[oldStatus].name} → ${statusConfig[newStatus].name}`);
                 saveProjects(projects);
                 renderBoard();
             }
@@ -998,7 +1007,7 @@
                 const lines = item.project.split(/[\n;；]/).map(s => s.trim()).filter(s => s);
                 lines.forEach(line => {
                     if (!line) return;
-                    projects.unshift({
+                    const newProject = {
                         id: Date.now() + Math.random() * 1000,
                         name: line.substring(0, 50),
                         createDate: item.date,
@@ -1006,8 +1015,14 @@
                         stage: 1,
                         progress: 20,
                         status: 'in-progress',
-                        description: item.project
-                    });
+                        description: item.project,
+                        logs: [{
+                            time: getCurrentTime(),
+                            action: '导入自Excel',
+                            detail: `初始导入，阶段 ${stages[1].name}`
+                        }]
+                    };
+                    projects.unshift(newProject);
                     count++;
                 });
             });
