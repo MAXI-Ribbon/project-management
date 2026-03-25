@@ -626,13 +626,18 @@
             .kanban-board {
                 grid-template-columns: 1fr;
             }
-            .calendar-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+            /* calendar-grid grid-template-columns 由JS动态设置，不在这里写死 */
             .stats {
                 width: 100%;
                 order: 3;
                 justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .calendar-header {
+                flex-direction: column;
+                gap: 10px;
             }
         }
 
@@ -678,10 +683,10 @@
         <!-- 日历页面 -->
         <div id="calendarPage" class="page-view">
             <div class="calendar-container">
-                <div class="calendar-header">
+                <div class="calendar-header" style="flex-wrap: wrap;">
                     <div style="display: flex; gap: 10px; align-items: center;">
-                        <label for="calendarView" style="margin: 0; white-space: nowrap;">视图：</label>
-                        <select id="calendarView" style="width: auto; margin: 0;">
+                        <label for="calendarView" style="margin: 0; white-space: nowrap; line-height: 34px;">视图：</label>
+                        <select id="calendarView" style="width: 80px; height: 34px; margin: 0; line-height: 34px;">
                             <option value="day">日</option>
                             <option value="week">周</option>
                             <option value="month" selected>月</option>
@@ -918,7 +923,19 @@
             document.getElementById('nextCalendar').addEventListener('click', nextCalendar);
             document.getElementById('calendarView').addEventListener('change', (e) => {
                 calendarView = e.target.value;
-                // 视图切换不需要修改日期，当前日期保持正确
+                // 切换视图时，从当前今天初始化，避免跳到很远的日期
+                const today = new Date();
+                if (calendarView === 'day') {
+                    currentDay.year = today.getFullYear();
+                    currentDay.month = today.getMonth();
+                    currentDay.day = today.getDate();
+                } else if (calendarView === 'week') {
+                    currentWeek.year = today.getFullYear();
+                    currentWeek.week = getWeekNumber(today);
+                } else if (calendarView === 'month') {
+                    currentCalendar.year = today.getFullYear();
+                    currentCalendar.month = today.getMonth();
+                }
                 renderCalendar();
             });
             document.getElementById('closeTempModal').addEventListener('click', closeTempModal);
@@ -1557,7 +1574,7 @@
                 case 'week':
                     currentWeek.week--;
                     if (currentWeek.week < 1) {
-                        currentWeek.week = 52;
+                        currentWeek.week = getWeekNumber(new Date(currentWeek.year - 1, 11, 31));
                         currentWeek.year--;
                     }
                     break;
@@ -1583,7 +1600,8 @@
                     break;
                 case 'week':
                     currentWeek.week++;
-                    if (currentWeek.week > 52) {
+                    const maxWeek = getWeekNumber(new Date(currentWeek.year, 11, 31));
+                    if (currentWeek.week > maxWeek) {
                         currentWeek.week = 1;
                         currentWeek.year++;
                     }
@@ -1695,6 +1713,7 @@
             grid.innerHTML = '';
             grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
 
+            // 添加星期表头
             const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
             weekdays.forEach(w => {
                 const div = document.createElement('div');
