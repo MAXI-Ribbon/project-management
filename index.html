@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>项目管理看板</title>
+    <title>生产项目管理</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,7 +18,7 @@
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
         }
 
@@ -89,25 +89,80 @@
             background-color: #73d13d;
         }
 
-        /* 看板 - 6个阶段6列 */
-        .kanban-board {
-            display: grid;
-            grid-template-columns: repeat(6, minmax(260px, 1fr));
-            gap: 15px;
+        /* === 页面容器 === */
+        .page-view {
+            display: none;
+        }
+        .page-view.active {
+            display: block;
         }
 
-        .kanban-column {
+        /* === 项目列表视图 === */
+        .list-container {
             background: white;
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
-        .column-header {
-            font-size: 16px;
+        .list-item {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-info {
+            flex: 1;
+        }
+
+        .list-name {
             font-weight: 600;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .list-meta {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .list-actions button {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        /* === 看板视图 === */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .kanban-column {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            min-height: 500px;
+        }
+
+        .column-header {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 2px solid #eee;
             display: flex;
             justify-content: space-between;
@@ -116,25 +171,24 @@
 
         .count-badge {
             background: #eee;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 11px;
             color: #666;
         }
 
         .kanban-card {
             border: 1px solid #e8e8e8;
             border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
             background: #fafafa;
             cursor: grab;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
         }
 
         .kanban-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
         }
 
         .kanban-card.dragging {
@@ -144,37 +198,37 @@
 
         .card-title {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             word-break: break-word;
         }
 
         .card-info {
-            font-size: 12px;
+            font-size: 11px;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             display: flex;
             justify-content: space-between;
         }
 
-        .card-progress {
-            margin-top: 8px;
-            margin-bottom: 8px;
+        .card-stage-date {
+            color: #1677ff;
+            font-weight: 500;
         }
 
         .progress-bar {
             width: 100%;
-            height: 6px;
+            height: 5px;
             background-color: #f0f0f0;
             border-radius: 3px;
             overflow: hidden;
+            margin: 6px 0;
         }
 
         .progress-fill {
             height: 100%;
             background-color: #52c41a;
-            transition: width 0.3s;
         }
 
         .overdue {
@@ -182,76 +236,131 @@
             border-color: #ffa39e;
         }
 
-        .overdue .card-title {
-            color: #cf1322;
-        }
-
         .danger-badge {
             background: #ffccc7;
             color: #cf1322;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .warning-badge {
-            background: #fff7e6;
-            color: #fa8c16;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .good-badge {
-            background: #f6ffed;
-            color: #52c41a;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .card-payment-info {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #666;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .paid-badge {
-            color: #52c41a;
-            font-weight: 600;
-        }
-
-        .unpaid-badge {
-            color: #fa8c16;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 10px;
             font-weight: 600;
         }
 
         .card-actions {
-            margin-top: 10px;
+            margin-top: 8px;
             display: flex;
-            gap: 5px;
+            gap: 4px;
             justify-content: flex-end;
         }
 
         .card-actions button {
-            padding: 4px 8px;
-            font-size: 12px;
+            padding: 3px 6px;
+            font-size: 11px;
         }
 
         .empty-column {
             text-align: center;
             color: #999;
             padding: 20px;
+            font-size: 12px;
+        }
+
+        /* === 日历视图 === */
+        .calendar-container {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-month {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-weight: 600;
+            padding: 8px;
+            color: #666;
+            background: #f5f5f5;
+            border-radius: 4px;
             font-size: 13px;
         }
 
-        /* 弹窗样式 */
+        .calendar-day {
+            min-height: 100px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            padding: 6px;
+            background: white;
+            position: relative;
+        }
+
+        .calendar-day.today {
+            background: #e6f7ff;
+            border-color: #1890ff;
+        }
+
+        .calendar-day.other-month {
+            background: #fafafa;
+            color: #ccc;
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .add-temp-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #52c41a;
+            color: white;
+            border: none;
+            font-size: 14px;
+            line-height: 18px;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .calendar-event {
+            font-size: 11px;
+            padding: 2px 4px;
+            margin-bottom: 3px;
+            border-radius: 3px;
+            background: #f0f0f0;
+            cursor: pointer;
+        }
+
+        .calendar-event.project {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .calendar-event.temp {
+            background: #f6ffed;
+            color: #52c41a;
+        }
+
+        /* === 弹窗 === */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -273,7 +382,7 @@
             background: white;
             border-radius: 8px;
             width: 90%;
-            max-width: 520px;
+            max-width: 550px;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -330,6 +439,23 @@
         textarea {
             min-height: 80px;
             resize: vertical;
+        }
+
+        /* 每个阶段日期 */
+        .stage-dates {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stage-date-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stage-date-item label {
+            font-size: 12px;
         }
 
         .modal-footer {
@@ -424,32 +550,104 @@
             color: #999;
             padding: 30px;
         }
+
+        /* 临时工作 */
+        .temp-item {
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+
+        .temp-item-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .temp-item-meta {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .temp-item-actions {
+            text-align: right;
+        }
+
+        .temp-item-actions button {
+            padding: 3px 8px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 1600px) {
+            .kanban-board {
+                grid-template-columns: repeat(4, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+            .calendar-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .stats {
+                width: 100%;
+                order: 3;
+                justify-content: space-between;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📋 生产项目管理看板</h1>
+        <h1>📋 生产项目管理</h1>
 
+        <!-- 工具栏 -->
         <div class="toolbar">
-            <input type="text" id="searchInput" placeholder="🔍 搜索项目名称...">
-            <select id="sortBy">
-                <option value="createDate-desc">按创建日期 新→旧</option>
-                <option value="createDate-asc">按创建日期 旧→新</option>
-                <option value="expectedDate-asc">按预期日期 早→晚</option>
-                <option value="expectedDate-desc">按预期日期 晚→早</option>
+            <select id="pageSelector">
+                <option value="list">项目列表</option>
+                <option value="kanban">看板视图</option>
+                <option value="calendar">日历视图</option>
             </select>
+            <input type="text" id="searchInput" placeholder="🔍 搜索项目...">
             <button class="btn-primary" id="addProjectBtn">+ 添加项目</button>
-            <button id="exportBtn" class="btn-success">导出JSON</button>
-            <label for="importFile" class="btn-success" style="cursor: pointer;">导入JSON</label>
+            <button class="btn-success" id="exportBtn">导出数据</button>
+            <label for="importFile" class="btn-success" style="display: inline-block; cursor: pointer;">导入备份</label>
             <input type="file" id="importFile" accept=".json" style="display: none;">
-            <button id="clearBtn" class="btn-danger">清空所有</button>
+            <button class="btn-danger" id="clearBtn">清空</button>
             <div class="stats" id="stats"></div>
         </div>
 
-        <div class="kanban-board" id="kanbanBoard"></div>
+        <!-- 项目列表页面 -->
+        <div id="listPage" class="page-view active">
+            <div class="list-container" id="listContainer">
+                <div style="text-align: center; color: #999; padding: 40px;">暂无项目</div>
+            </div>
+        </div>
+
+        <!-- 看板页面 -->
+        <div id="kanbanPage" class="page-view">
+            <div class="kanban-board" id="kanbanBoard"></div>
+        </div>
+
+        <!-- 日历页面 -->
+        <div id="calendarPage" class="page-view">
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button class="btn-primary" id="prevMonth">&lt; 上个月</button>
+                    <div class="calendar-month" id="calendarMonth"></div>
+                    <button class="btn-primary" id="nextMonth">下个月 &gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- 新增/编辑弹窗 -->
+    <!-- 添加/编辑项目弹窗 -->
     <div class="modal-overlay" id="modal">
         <div class="modal">
             <div class="modal-header">
@@ -460,83 +658,35 @@
                 <form id="projectForm">
                     <input type="hidden" id="editId">
                     <div class="form-group">
-                        <label for="projectName">项目名称 *</label>
-                        <input type="text" id="projectName" required placeholder="输入项目名称/客户地址">
+                        <label for="projectName">项目名称/地址 *</label>
+                        <input type="text" id="projectName" required placeholder="请输入项目名称或地址">
                     </div>
+
                     <div class="form-group">
                         <label for="createDate">创建日期</label>
                         <input type="date" id="createDate">
                     </div>
+
                     <div class="form-group">
                         <label for="expectedDate">预期完成日期</label>
                         <input type="date" id="expectedDate">
                     </div>
-                    <div class="form-group">
-                        <label for="stage">当前生产阶段</label>
-                        <select id="stage">
-                            <option value="0">1. 未开始</option>
-                            <option value="1">2. 报价</option>
-                            <option value="2">3. 量尺</option>
-                            <option value="3">4. 排产</option>
-                            <option value="4">5. 画图</option>
-                            <option value="5">6. 对图/交付</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="totalAmount">项目总金额 (AUD)</label>
-                        <input type="number" id="totalAmount" step="0.01" placeholder="输入总金额">
-                    </div>
 
-                    <h3 style="margin: 20px 0 10px 0; font-size: 16px; color: #555;">进度款（5期，输入百分比自动计算）</h3>
-                    <div id="progressPayments">
-                        <div style="display: grid; grid-template-columns: 70px 110px 120px 1fr 70px; gap: 8px; margin-bottom: 10px; align-items: center;">
-                            <label>进度 1</label>
-                            <input type="number" class="progress-percent" min="0" max="100" placeholder="%">
-                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
-                            <input type="text" class="progress-note" placeholder="备注">
-                            <label style="margin:0; text-align:center;"><input type="checkbox" class="progress-paid"> 已付</label>
-                        </div>
-                        <div                        style="display: grid; grid-template-columns: 70px 110px 120px 1fr 70px; gap: 8px; margin-bottom: 10px; align-items: center;">
-                            <label>进度 2</label>
-                            <input type="number" class="progress-percent" min="0" max="100" placeholder="%">
-                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
-                            <input type="text" class="progress-note" placeholder="备注">
-                            <label style="margin:0; text-align:center;"><input type="checkbox" class="progress-paid"> 已付</label>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 70px 110px 120px 1fr 70px; gap: 8px; margin-bottom: 10px; align-items: center;">
-                            <label>进度 3</label>
-                            <input type="number" class="progress-percent" min="0" max="100" placeholder="%">
-                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
-                            <input type="text" class="progress-note" placeholder="备注">
-                            <label style="margin:0; text-align:center;"><input type="checkbox" class="progress-paid"> 已付</label>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 70px 110px 120px 1fr 70px; gap: 8px; margin-bottom: 10px; align-items: center;">
-                            <label>进度 4</label>
-                            <input type="number" class="progress-percent" min="0" max="100" placeholder="%">
-                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
-                            <input type="text" class="progress-note" placeholder="备注">
-                            <label style="margin:0; text-align:center;"><input type="checkbox" class="progress-paid"> 已付</label>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 70px 110px 120px 1fr 70px; gap: 8px; margin-bottom: 10px; align-items: center;">
-                            <label>进度 5</label>
-                            <input type="number" class="progress-percent" min="0" max="100" placeholder="%">
-                            <input type="number" class="progress-amount" step="0.01" readonly placeholder="金额">
-                            <input type="text" class="progress-note" placeholder="备注">
-                            <label style="margin:0; text-align:center;"><input type="checkbox" class="progress-paid"> 已付</label>
-                        </div>
-                    </div>
-
-                    <div style="background: #f6f8fa; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-                            <span>进度款总计：<strong id="progressTotal">0.00</strong> AUD</span>
-                            <span>已付总额：<strong id="paidTotal">0.00</strong> AUD</span>
-                            <span>未付总额：<strong id="unpaidTotal">0.00</strong> AUD</span>
+                    <div class="form-group">
+                        <label>各阶段计划日期</label>
+                        <div class="stage-dates" id="stageDatesContainer">
+                            <!-- 动态生成 -->
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="description">项目备注</label>
-                        <textarea id="description" placeholder="输入联系人、客户要求等备注信息"></textarea>
+                        <label for="currentStage">当前所处阶段</label>
+                        <select id="currentStage"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">备注 / 联系人信息</label>
+                        <textarea id="description" placeholder="输入联系人电话、备注信息等"></textarea>
                     </div>
                 </form>
             </div>
@@ -547,11 +697,38 @@
         </div>
     </div>
 
-    <!-- 日志弹窗 -->
+    <!-- 添加临时工作弹窗 -->
+    <div class="modal-overlay" id="tempModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="tempModalTitle">添加当日临时工作</h2>
+                <button class="close-btn" id="closeTempModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="tempForm">
+                    <input type="hidden" id="tempDate">
+                    <div class="form-group">
+                        <label for="tempTitle">工作标题 *</label>
+                        <input type="text" id="tempTitle" required placeholder="输入工作内容">
+                    </div>
+                    <div class="form-group">
+                        <label for="tempNote">备注</label>
+                        <textarea id="tempNote" placeholder="补充说明"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-danger" id="cancelTempBtn">取消</button>
+                <button class="btn-primary" id="saveTempBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改日志弹窗 -->
     <div class="log-modal" id="logModal">
         <div class="log-container">
             <div class="log-header">
-                <h2>修改日志</h2>
+                <h2 id="logModalTitle">修改日志</h2>
                 <button class="close-btn" id="closeLogModal">&times;</button>
             </div>
             <div class="log-body" id="logBody">
@@ -559,676 +736,708 @@
         </div>
     </div>
 
-<script>
-// 定义六个阶段
-const stages = [
-    { name: '1. 未开始',     progress: 0,  status: 'not-started' },
-    { name: '2. 报价',      progress: 20, status: 'in-progress' },
-    { name: '3. 量尺',      progress: 40, status: 'in-progress' },
-    { name: '4. 排产',      progress: 60, status: 'in-progress' },
-    { name: '5. 画图',      progress: 80, status: 'in-progress' },
-    { name: '6. 对图',      progress: 100, status: 'completed' }
-];
+    <script>
+        // 7个生产阶段定义
+        const stages = [
+            { id: 0, name: '报价', progress: Math.round(100/7*1) },
+            { id: 1, name: '画图', progress: Math.round(100/7*2) },
+            { id: 2, name: '对图', progress: Math.round(100/7*3) },
+            { id: 3, name: '量尺', progress: Math.round(100/7*4) },
+            { id: 4, name: '排产', progress: Math.round(100/7*5) },
+            { id: 5, name: '组装', progress: Math.round(100/7*6) },
+            { id: 6, name: 'Delivered', progress: 100 }
+        ];
 
-const stageNames = stages.map(s => s.name);
+        let draggedProject = null;
+        let currentLogProjectId = null;
+        let currentCalendar = { year: null, month: null };
+        let pendingTempDate = null;
 
-// 状态配置
-const statusConfig = {
-    'not-started': { name: '未开始', color: '#d9d9d9' },
-    'in-progress': { name: '进行中', color: '#1677ff' },
-    'review': { name: '审核中', color: '#faad14' },
-    'completed': { name: '已完成', color: '#52c41a' }
-};
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 设置今天日期
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            currentCalendar.year = today.getFullYear();
+            currentCalendar.month = today.getMonth();
 
-// 获取存储数据
-function getProjects() {
-    const data = localStorage.getItem('project_manager_data');
-    return data ? JSON.parse(data) : [];
-}
+            // 生成阶段选择和日期输入
+            const stageContainer = document.getElementById('stageDatesContainer');
+            const stageSelect = document.getElementById('currentStage');
+            stages.forEach((stage, index) => {
+                // 日期输入框
+                const div = document.createElement('div');
+                div.className = 'stage-date-item';
+                div.innerHTML = `
+                    <label for="stageDate_${index}">${index+1}. ${stage.name}</label>
+                    <input type="date" id="stageDate_${index}">
+                `;
+                stageContainer.appendChild(div);
 
-// 保存数据
-function saveProjects(projects) {
-    localStorage.setItem('project_manager_data', JSON.stringify(projects));
-}
+                // 下拉选项
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${index+1}. ${stage.name}`;
+                stageSelect.appendChild(option);
+            });
 
-// HTML转义防XSS
-function escapeHtml(text) {
-    if (!text) return '';
-    return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
+            // 绑定事件
+            document.getElementById('pageSelector').addEventListener('change', switchPage);
+            document.getElementById('addProjectBtn').addEventListener('click', openAddModal);
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('cancelBtn').addEventListener('click', closeModal);
+            document.getElementById('saveBtn').addEventListener('click', saveProject);
+            document.getElementById('closeLogModal').addEventListener('click', closeLogModal);
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            document.getElementById('importFile').addEventListener('change', importJsonData);
+            document.getElementById('clearBtn').addEventListener('click', clearAll);
+            document.getElementById('searchInput').addEventListener('input', renderCurrentPage);
+            document.getElementById('prevMonth').addEventListener('click', prevMonth);
+            document.getElementById('nextMonth').addEventListener('click', nextMonth);
+            document.getElementById('closeTempModal').addEventListener('click', closeTempModal);
+            document.getElementById('cancelTempBtn').addEventListener('click', closeTempModal);
+            document.getElementById('saveTempBtn').addEventListener('click', saveTempWork);
 
-// 获取当前时间字符串
-function getCurrentTime() {
-    const now = new Date();
-    return now.toLocaleString('zh-CN');
-}
+            document.getElementById('modal').addEventListener('click', (e) => {
+                if (e.target.id === 'modal') closeModal();
+            });
+            document.getElementById('logModal').addEventListener('click', (e) => {
+                if (e.target.id === 'logModal') closeLogModal();
+            });
+            document.getElementById('tempModal').addEventListener('click', (e) => {
+                if (e.target.id === 'tempModal') closeTempModal();
+            });
 
-// 添加修改日志 - 任何修改都会记录
-function addLog(projectId, action, detail) {
-    const projects = getProjects();
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return;
-    if (!project.logs) project.logs = [];
-    project.logs.unshift({
-        time: getCurrentTime(),
-        action: action,
-        detail: detail
-    });
-    saveProjects(projects);
-}
+            // 设置默认创建日期
+            document.getElementById('createDate').value = todayStr;
 
-// 计算进度款金额
-window.calculateProgressAmount = function(input) {
-    const container = document.getElementById('progressPayments');
-    const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
-    updateProgressTotals(totalAmount, container);
-};
-
-// 更新进度款总额/已付/未付
-function updateProgressTotals(totalAmount, container) {
-    let progressTotal = 0;
-    let paidTotal = 0;
-    container.querySelectorAll('.progress-percent').forEach((percentInput) => {
-        const percent = parseFloat(percentInput.value) || 0;
-        const amount = totalAmount * percent / 100;
-        const amountInput = percentInput.parentElement.querySelector('.progress-amount');
-        amountInput.value = amount.toFixed(2);
-        progressTotal += amount;
-        const paidCheckbox = percentInput.parentElement.querySelector('.progress-paid');
-        if (paidCheckbox.checked) {
-            paidTotal += amount;
-        }
-    });
-    document.getElementById('progressTotal').textContent = progressTotal.toFixed(2);
-    document.getElementById('paidTotal').textContent = paidTotal.toFixed(2);
-    document.getElementById('unpaidTotal').textContent = (progressTotal - paidTotal).toFixed(2);
-}
-
-// 绑定进度款事件
-function bindProgressEvents() {
-    document.querySelectorAll('#progressPayments .progress-percent, #progressPayments .progress-paid').forEach(el => {
-        el.addEventListener('change', () => {
-            const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
-            updateProgressTotals(totalAmount, document.getElementById('progressPayments'));
+            switchPage();
+            renderCurrentPage();
+            renderCalendar();
         });
-    });
-    document.getElementById('totalAmount').addEventListener('input', () => {
-        const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
-        updateProgressTotals(totalAmount, document.getElementById('progressPayments'));
-    });
-}
 
-// 打开新增弹窗
-function openAddModal() {
-    document.getElementById('modalTitle').textContent = '添加新项目';
-    document.getElementById('editId').value = '';
-    document.getElementById('projectForm').reset();
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('createDate').value = today;
-    document.getElementById('stage').value = '0';
-    document.getElementById('totalAmount').value = '';
-    // 清空进度款
-    document.querySelectorAll('#progressPayments input').forEach(i => {
-        if (i.type === 'checkbox') i.checked = false;
-        else i.value = '';
-    });
-    updateProgressTotals(0, document.getElementById('progressPayments'));
-    document.getElementById('modal').classList.add('show');
-}
+        function switchPage() {
+            const selected = document.getElementById('pageSelector').value;
+            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+            if (selected === 'list') {
+                document.getElementById('listPage').classList.add('active');
+            } else if (selected === 'kanban') {
+                document.getElementById('kanbanPage').classList.add('active');
+                renderBoard();
+            } else if (selected === 'calendar') {
+                document.getElementById('calendarPage').classList.add('active');
+                renderCalendar();
+            }
+            updateStats();
+        }
 
-// 关闭弹窗
-function closeModal() {
-    document.getElementById('modal').classList.remove('show');
-}
+        function renderCurrentPage() {
+            const selected = document.getElementById('pageSelector').value;
+            if (selected === 'list') {
+                renderList();
+            } else if (selected === 'kanban') {
+                renderBoard();
+            } else if (selected === 'calendar') {
+                renderCalendar();
+            }
+        }
 
-// 打开编辑弹窗
-function openEditModal(project) {
-    document.getElementById('modalTitle').textContent = '编辑项目';
-    document.getElementById('editId').value = project.id;
-    document.getElementById('projectName').value = project.name;
-    document.getElementById('createDate').value = project.createDate;
-    document.getElementById('expectedDate').value = project.expectedDate || '';
-    document.getElementById('totalAmount').value = project.totalAmount || '';
-    document.getElementById('stage').value = project.stage || '0';
-    document.getElementById('description').value = project.description || '';
+        // === 数据存取 ===
+        function getProjects() {
+            const projects = localStorage.getItem('projects');
+            const parsed = projects ? JSON.parse(projects) : [];
+            parsed.forEach(project => {
+                if (!project.logs) project.logs = [];
+                if (!project.stageDates) project.stageDates = {};
+            });
+            return parsed;
+        }
 
-    // 加载进度款
-    const rows = document.querySelectorAll('#progressPayments > div');
-    (project.progressPayments || []).forEach((pp, idx) => {
-        if (idx >= rows.length) return;
-        const row = rows[idx];
-        row.querySelector('.progress-percent').value = pp.percent || '';
-        row.querySelector('.progress-amount').value = (pp.amount || 0).toFixed(2);
-        row.querySelector('.progress-note').value = pp.note || '';
-        row.querySelector('.progress-paid').checked = pp.paid || false;
-    });
-    // 计算总额
-    const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
-    updateProgressTotals(totalAmount, document.getElementById('progressPayments'));
+        function getTempWorks() {
+            const temp = localStorage.getItem('tempWorks');
+            return temp ? JSON.parse(temp) : [];
+        }
 
-    document.getElementById('modal').classList.add('show');
-}
+        function saveProjects(projects) {
+            localStorage.setItem('projects', JSON.stringify(projects));
+        }
 
-// 关闭日志弹窗
-function closeLogModal() {
-    document.getElementById('logModal').classList.remove('show');
-}
+        function saveTempWorks(tempWorks) {
+            localStorage.setItem('tempWorks', JSON.stringify(tempWorks));
+        }
 
-// 打开查看日志
-function openLogModal(projectId) {
-    const projects = getProjects();
-    const project = projects.find(p => p.id === projectId);
-    const logBody = document.getElementById('logBody');
-    logBody.innerHTML = '';
-    if (!project || !project.logs || project.logs.length === 0) {
-        logBody.innerHTML = '<div class="empty-log">暂无修改日志</div>';
-    } else {
-        project.logs.forEach(log => {
-            const div = document.createElement('div');
-            div.className = 'log-item';
-            div.innerHTML = `
-                <div>
-                    <span class="log-time">${log.time}</span>
-                    <span class="log-action">${escapeHtml(log.action)}</span>
-                </div>
-                ${log.detail ? `<div class="log-detail">${escapeHtml(log.detail)}</div>` : ''}
+        // === 时间工具 ===
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleString('zh-CN');
+        }
+
+        function calculateDaysLeft(dateStr) {
+            if (!dateStr) return null;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const target = new Date(dateStr);
+            target.setHours(0, 0, 0, 0);
+            return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+        }
+
+        // === 日志 ===
+        function addLog(projectId, action, detail) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
+            if (!project.logs) project.logs = [];
+            project.logs.unshift({
+                time: getCurrentTime(),
+                action: action,
+                detail: detail
+            });
+            saveProjects(projects);
+        }
+
+        function openLogModal(projectId) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (!project) {
+                alert('找不到项目');
+                return;
+            }
+            document.getElementById('logModalTitle').textContent = `修改日志 - ${project.name}`;
+            const logBody = document.getElementById('logBody');
+            if (!project.logs || project.logs.length === 0) {
+                logBody.innerHTML = '<div class="empty-log">暂无修改记录</div>';
+            } else {
+                logBody.innerHTML = project.logs.map(log => `
+                    <div class="log-item">
+                        <div>
+                            <span class="log-time">${escapeHtml(log.time)}</span>
+                            <span class="log-action">${escapeHtml(log.action)}</span>
+                        </div>
+                        ${log.detail ? `<div class="log-detail">${escapeHtml(log.detail)}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+            document.getElementById('logModal').classList.add('show');
+        }
+
+        function closeLogModal() {
+            document.getElementById('logModal').classList.remove('show');
+        }
+
+        // === 弹窗操作 ===
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '添加新项目';
+            document.getElementById('projectForm').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('createDate').value = today;
+            document.getElementById('editId').value = '';
+            stages.forEach((s, i) => {
+                document.getElementById(`stageDate_${i}`).value = '';
+            });
+            document.getElementById('currentStage').value = '0';
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function openEditModal(project) {
+            document.getElementById('modalTitle').textContent = '编辑项目';
+            document.getElementById('editId').value = project.id;
+            document.getElementById('projectName').value = project.name;
+            document.getElementById('createDate').value = project.createDate;
+            document.getElementById('expectedDate').value = project.expectedDate || '';
+            document.getElementById('currentStage').value = project.currentStage || 0;
+            document.getElementById('description').value = project.description || '';
+
+            stages.forEach((s, i) => {
+                document.getElementById(`stageDate_${i}`).value = project.stageDates ? (project.stageDates[i] || '') : '';
+            });
+
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        function saveProject() {
+            const projects = getProjects();
+            const editId = document.getElementById('editId').value;
+
+            // 收集各阶段日期
+            const stageDates = {};
+            stages.forEach((s, i) => {
+                stageDates[i] = document.getElementById(`stageDate_${i}`).value || '';
+            });
+
+            const currentStage = parseInt(document.getElementById('currentStage').value);
+            const project = {
+                id: editId ? parseInt(editId) : Date.now(),
+                name: document.getElementById('projectName').value.trim(),
+                createDate: document.getElementById('createDate').value || new Date().toISOString().split('T')[0],
+                expectedDate: document.getElementById('expectedDate').value,
+                currentStage: currentStage,
+                progress: stages[currentStage].progress,
+                description: document.getElementById('description').value.trim(),
+                stageDates: stageDates
+            };
+
+            if (editId) {
+                const index = projects.findIndex(p => p.id === project.id);
+                if (index >= 0) {
+                    // 保留原有日志
+                    project.logs = projects[index].logs || [];
+                    projects[index] = project;
+                    addLog(project.id, '编辑项目', `修改为 ${stages[currentStage].name}`);
+                }
+            } else {
+                project.logs = [{
+                    time: getCurrentTime(),
+                    action: '创建项目',
+                    detail: `初始阶段 ${stages[currentStage].name}`
+                }];
+                projects.unshift(project);
+            }
+
+            saveProjects(projects);
+            closeModal();
+            renderCurrentPage();
+            updateStats();
+        }
+
+        function deleteProject(id) {
+            if (!confirm('确定要删除这个项目吗？')) return;
+            let projects = getProjects();
+            projects = projects.filter(p => p.id !== id);
+            saveProjects(projects);
+            renderCurrentPage();
+            updateStats();
+        }
+
+        function moveToStage(projectId, newStage) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                const oldStageName = stages[project.currentStage].name;
+                const newStageName = stages[newStage].name;
+                project.currentStage = newStage;
+                project.progress = stages[newStage].progress;
+                addLog(projectId, '移动阶段', `${oldStageName} → ${newStageName}`);
+                saveProjects(projects);
+                renderCurrentPage();
+                updateStats();
+            }
+        }
+
+        function nextStage(id) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === id);
+            if (project && project.currentStage < 6) {
+                moveToStage(id, project.currentStage + 1);
+            }
+        }
+
+        function prevStage(id) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === id);
+            if (project && project.currentStage > 0) {
+                moveToStage(id, project.currentStage - 1);
+            }
+        }
+
+        // === 项目列表视图 ===
+        function renderList() {
+            const projects = getProjects();
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = projects.filter(p => 
+                !searchText || 
+                p.name.toLowerCase().includes(searchText) || 
+                (p.description && p.description.toLowerCase().includes(searchText))
+            );
+
+            // 按预期完成日期排序
+            filtered.sort((a, b) => {
+                if (!a.expectedDate) return 1;
+                if (!b.expectedDate) return -1;
+                return a.expectedDate.localeCompare(b.expectedDate);
+            });
+
+            const container = document.getElementById('listContainer');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">暂无匹配项目</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(project => {
+                const stageInfo = stages[project.currentStage];
+                return `
+                    <div class="list-item">
+                        <div class="list-info">
+                            <div class="list-name">${escapeHtml(project.name)}</div>
+                            <div class="list-meta">
+                                当前阶段：${stageInfo.name} | 进度：${stageInfo.progress}% 
+                                ${project.expectedDate ? `| 预期完成：${project.expectedDate}` : ''}
+                            </div>
+                        </div>
+                        <div class="list-actions">
+                            ${project.currentStage > 0 ? `<button class="btn-success" onclick="prevStage(${project.id})">上一阶段</button>` : ''}
+                            ${project.currentStage < 6 ? `<button class="btn-success" onclick="nextStage(${project.id})">下一阶段</button>` : ''}
+                            <button class="btn-primary" onclick="openLogModal(${project.id})">日志</button>
+                            <button class="btn-primary" onclick="openEditModal(${project})">编辑</button>
+                            <button class="btn-danger" onclick="deleteProject(${project.id})">删除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // === 看板视图 ===
+        function renderBoard() {
+            const projects = getProjects();
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = projects.filter(p => 
+                !searchText || 
+                p.name.toLowerCase().includes(searchText) || 
+                (p.description && p.description.toLowerCase().includes(searchText))
+            );
+
+            // 按阶段分组
+            const grouped = {};
+            stages.forEach(s => grouped[s.id] = []);
+            filtered.forEach(project => {
+                grouped[project.currentStage].push(project);
+            });
+
+            // 每个阶段内部按当前阶段日期排序
+            stages.forEach(s => {
+                grouped[s.id].sort((a, b) => {
+                    const dateA = a.stageDates ? (a.stageDates[a.currentStage] || '') : '';
+                    const dateB = b.stageDates ? (b.stageDates[b.currentStage] || '') : '';
+                    if (!dateA) return 1;
+                    if (!dateB) return -1;
+                    return dateA.localeCompare(dateB);
+                });
+            });
+
+            const board = document.getElementById('kanbanBoard');
+            board.innerHTML = '';
+
+            stages.forEach(stage => {
+                const column = document.createElement('div');
+                column.className = 'kanban-column';
+                column.innerHTML = `
+                    <div class="column-header">
+                        ${stage.name}
+                        <span class="count-badge">${grouped[stage.id].length}</span>
+                    </div>
+                `;
+
+                if (grouped[stage.id].length === 0) {
+                    column.innerHTML += '<div class="empty-column">暂无项目</div>';
+                } else {
+                    grouped[stage.id].forEach(project => {
+                        const card = document.createElement('div');
+                        card.className = 'kanban-card';
+                        card.draggable = true;
+
+                        const currentDate = project.stageDates ? (project.stageDates[project.currentStage] || '') : '';
+                        const daysLeft = currentDate ? calculateDaysLeft(currentDate) : null;
+
+                        let badge = '';
+                        if (daysLeft !== null && daysLeft < 0) {
+                            badge = `<span class="danger-badge">逾期 ${Math.abs(daysLeft)} 天</span>`;
+                        } else if (daysLeft !== null && daysLeft <= 3) {
+                            badge = `<span class="danger-badge">剩余 ${daysLeft} 天</span>`;
+                        }
+
+                        let isOverdue = daysLeft !== null && daysLeft < 0;
+                        card.className += isOverdue ? ' overdue' : '';
+
+                        card.innerHTML = `
+                            <div class="card-title">${escapeHtml(project.name)}</div>
+                            <div class="card-info">
+                                <span class="card-stage-date">计划日期：${currentDate || '未设置'}</span>
+                                ${badge}
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${project.progress}%"></div>
+                            </div>
+                            <div class="card-actions">
+                                ${project.currentStage > 0 ? `<button class="btn-success" onclick="event.stopPropagation(); prevStage(${project.id})">上一阶段</button>` : ''}
+                                ${project.currentStage < 6 ? `<button class="btn-success" onclick="event.stopPropagation(); nextStage(${project.id})">下一阶段</button>` : ''}
+                                <button class="btn-primary" onclick="event.stopPropagation(); openLogModal(${project.id})">日志</button>
+                                <button class="btn-primary" onclick="event.stopPropagation(); openEditModal(${project.id})">编辑</button>
+                                <button class="btn-danger" onclick="event.stopPropagation(); deleteProject(${project.id})">删除</button>
+                            </div>
+                        `;
+
+                        card.addEventListener('dragstart', () => {
+                            draggedProject = project;
+                            card.classList.add('dragging');
+                        });
+                        card.addEventListener('dragend', () => {
+                            draggedProject = null;
+                            card.classList.remove('dragging');
+                        });
+
+                        column.appendChild(card);
+                    });
+                }
+
+                column.addEventListener('dragover', e => e.preventDefault());
+                column.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (draggedProject && draggedProject.currentStage !== stage.id) {
+                        moveToStage(draggedProject.id, stage.id);
+                    }
+                });
+
+                board.appendChild(column);
+            });
+        }
+
+        // === 日历视图 ===
+        function prevMonth() {
+            currentCalendar.month--;
+            if (currentCalendar.month < 0) {
+                currentCalendar.month = 11;
+                currentCalendar.year--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentCalendar.month++;
+            if (currentCalendar.month > 11) {
+                currentCalendar.month = 0;
+                currentCalendar.year++;
+            }
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const { year, month } = currentCalendar;
+            const projects = getProjects();
+            const tempWorks = getTempWorks();
+
+            document.getElementById('calendarMonth').textContent = `${year}年 ${month + 1}月`;
+
+            // 计算当月第一天
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDayOfWeek = firstDay.getDay(); // 0-6, 0周日
+            const today = new Date();
+            const isToday = (y, m, d) => y === today.getFullYear() && m === today.getMonth() && d === today.getDate();
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            // 星期表头
+            ['日', '一', '二', '三', '四', '五', '六'].forEach(day => {
+                const el = document.createElement('div');
+                el.className = 'calendar-weekday';
+                el.textContent = day;
+                grid.appendChild(el);
+            });
+
+            // 前面补上月的空白
+            for (let i = 0; i < startDayOfWeek; i++) {
+                const el = document.createElement('div');
+                el.className = 'calendar-day other-month';
+                grid.appendChild(el);
+            }
+
+            // 生成日期格子
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const el = document.createElement('div');
+                el.className = 'calendar-day';
+                if (isToday(year, month, day)) {
+                    el.classList.add('today');
+                }
+                if (year !== currentCalendar.year || (year === currentCalendar.year && month !== currentCalendar.month)) {
+                    el.classList.add('other-month');
+                }
+
+                el.innerHTML = `
+                    <div class="day-number">
+                        ${day}
+                        <button class="add-temp-btn" onclick="openAddTemp('${dateStr}')">+</button>
+                    </div>
+                    <div class="day-events"></div>
+                `;
+
+                // 收集今天当前阶段日期匹配的项目
+                const todayProjects = projects.filter(p => {
+                    if (!p.stageDates) return false;
+                    return p.stageDates[p.currentStage] === dateStr;
+                });
+
+                const todayTemps = tempWorks.filter(t => t.date === dateStr);
+
+                todayProjects.forEach(p => {
+                    const ev = document.createElement('div');
+                    ev.className = 'calendar-event project';
+                    ev.textContent = p.name;
+                    ev.onclick = () => openEditModal(p);
+                    el.querySelector('.day-events').appendChild(ev);
+                });
+
+                todayTemps.forEach(t => {
+                    const ev = document.createElement('div');
+                    ev.className = 'calendar-event temp';
+                    ev.textContent = t.title;
+                    ev.onclick = () => editTempWork(t.id);
+                    el.querySelector('.day-events').appendChild(ev);
+                });
+
+                grid.appendChild(el);
+            }
+
+            // 补后面下个月的空白
+            const totalCells = startDayOfWeek + lastDay.getDate();
+            const remaining = 7 - (totalCells % 7);
+            if (remaining < 7) {
+                for (let i = 0; i < remaining; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'calendar-day other-month';
+                    grid.appendChild(el);
+                }
+            }
+        }
+
+        function openAddTemp(dateStr) {
+            pendingTempDate = dateStr;
+            document.getElementById('tempDate').value = dateStr;
+            document.getElementById('tempForm').reset();
+            document.getElementById('tempModalTitle').textContent = `添加临时工作 - ${dateStr}`;
+            document.getElementById('tempModal').classList.add('show');
+        }
+
+        function closeTempModal() {
+            document.getElementById('tempModal').classList.remove('show');
+            pendingTempDate = null;
+        }
+
+        function saveTempWork() {
+            const tempWorks = getTempWorks();
+            const date = document.getElementById('tempDate').value;
+            const title = document.getElementById('tempTitle').value.trim();
+            const note = document.getElementById('tempNote').value.trim();
+
+            if (!title) {
+                alert('请输入工作标题');
+                return;
+            }
+
+            const temp = {
+                id: Date.now(),
+                date: date,
+                title: title,
+                note: note,
+                createTime: getCurrentTime()
+            };
+
+            tempWorks.unshift(temp);
+            saveTempWorks(tempWorks);
+            closeTempModal();
+            renderCalendar();
+        }
+
+        function editTempWork(id) {
+            const tempWorks = getTempWorks();
+            const temp = tempWorks.find(t => t.id === id);
+            if (!temp) return;
+
+            if (confirm(`确定要删除临时工作：${temp.title} 吗？`)) {
+                const newList = tempWorks.filter(t => t.id !== id);
+                saveTempWorks(newList);
+                renderCalendar();
+            }
+        }
+
+        // === 导入导出 ===
+        function exportData() {
+            const data = {
+                projects: getProjects(),
+                tempWorks: getTempWorks()
+            };
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'project-management-backup.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importJsonData(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (imported.projects && Array.isArray(imported.projects)) {
+                        if (!confirm(`确认导入 ${imported.projects.length} 个项目？会覆盖现有数据。`)) return;
+                        saveProjects(imported.projects);
+                        if (imported.tempWorks && Array.isArray(imported.tempWorks)) {
+                            saveTempWorks(imported.tempWorks);
+                        }
+                        renderCurrentPage();
+                        updateStats();
+                        alert(`导入成功！共 ${imported.projects.length} 个项目`);
+                    } else if (Array.isArray(imported)) {
+                        // 兼容旧格式
+                        if (!confirm(`确认导入 ${imported.length} 个项目？会覆盖现有数据。`)) return;
+                        saveProjects(imported);
+                        renderCurrentPage();
+                        updateStats();
+                        alert(`导入成功！共 ${imported.length} 个项目`);
+                    } else {
+                        alert('格式不正确');
+                    }
+                    e.target.value = '';
+                } catch (err) {
+                    alert('导入失败：' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAll() {
+            if (!confirm('确定要清空所有项目和临时工作吗？此操作不可恢复！')) return;
+            localStorage.removeItem('projects');
+            localStorage.removeItem('tempWorks');
+            renderCurrentPage();
+            updateStats();
+        }
+
+        // === 统计 ===
+        function updateStats() {
+            const projects = getProjects();
+            const total = projects.length;
+            const counts = stages.map(() => 0);
+            projects.forEach(p => counts[p.currentStage]++);
+            const completed = counts[6];
+            const todo = total - completed;
+            document.getElementById('stats').innerHTML = `
+                总计: ${total} | 进行中: ${todo} | 已交付: ${completed}
             `;
-            logBody.appendChild(div);
-        });
-    }
-    document.getElementById('logModal').classList.add('show');
-}
-
-// 删除项目
-function deleteProject(id) {
-    if (!confirm('确定删除这个项目吗？删除后无法恢复！')) return;
-    const projects = getProjects().filter(p => p.id !== id);
-    saveProjects(projects);
-    renderBoard();
-}
-
-// 保存项目（新建/编辑）
-function saveProject() {
-    const projects = getProjects();
-    const editId = document.getElementById('editId').value;
-    const stageIndex = parseInt(document.getElementById('stage').value);
-    const stageInfo = stages[stageIndex];
-
-    // 读取进度款
-    const progressPayments = [];
-    document.querySelectorAll('#progressPayments > div').forEach((row, idx) => {
-        const percent = parseFloat(row.querySelector('.progress-percent').value) || 0;
-        const amount = parseFloat(row.querySelector('.progress-amount').value) || 0;
-        const note = row.querySelector('.progress-note').value.trim();
-        const paid = row.querySelector('.progress-paid').checked;
-        progressPayments.push({ index: idx+1, percent, amount, paid, note });
-    });
-
-    const project = {
-        name: document.getElementById('projectName').value.trim(),
-        createDate: document.getElementById('createDate').value || new Date().toISOString().split('T')[0],
-        expectedDate: document.getElementById('expectedDate').value,
-        totalAmount: parseFloat(document.getElementById('totalAmount').value) || 0,
-        stage: stageIndex,
-        progress: stageInfo.progress,
-        status: stageInfo.status,
-        progressPayments: progressPayments,
-        description: document.getElementById('description').value.trim()
-    };
-
-    // 计算已付未付
-    project.paidTotal = progressPayments.filter(p => p.paid).reduce((s, p) => s + p.amount, 0);
-    project.unpaidTotal = progressPayments.reduce((s, p) => s + p.amount, 0) - project.paidTotal;
-
-    if (editId) {
-        // 编辑模式，记录修改
-        project.id = parseInt(editId);
-        const idx = projects.findIndex(p => p.id === project.id);
-        if (idx >= 0 && projects[idx].logs) {
-            project.logs = projects[idx].logs;
-        }
-        let changes = [];
-        if (idx >= 0) {
-            const old = projects[idx];
-            if ((old.totalAmount || 0) !== project.totalAmount) changes.push(`总金额 ${(old.totalAmount||0).toFixed(2)} → ${project.totalAmount.toFixed(2)}`);
-            if (old.stage !== project.stage) changes.push(`阶段从 ${stageNames[old.stage]} → ${stageNames[project.stage]}`);
-            (project.progressPayments || []).forEach((np, i) => {
-                const op = (old.progressPayments || [])[i];
-                if (!op) return;
-                if (np.percent !== op.percent) changes.push(`进度${i+1}百分比: ${op.percent}% → ${np.percent}%`);
-                if (np.paid !== op.paid) changes.push(`进度${i+1}已付: ${op.paid} → ${np.paid}`);
-            });
-            const changeDetail = changes.length ? changes.join('；') : '修改基础信息';
-            projects[idx] = project;
-            addLog(project.id, '编辑项目', changeDetail);
-        }
-    } else {
-        // 新建模式
-        project.id = Date.now();
-        project.logs = [];
-        let initDetail = `初始阶段 ${stageNames[stageIndex]}`;
-        if (project.totalAmount > 0) initDetail += `，总金额 ${project.totalAmount.toFixed(2)} AUD`;
-        projects.unshift(project);
-        addLog(project.id, '创建项目', initDetail);
-    }
-
-    saveProjects(projects);
-    closeModal();
-    renderBoard();
-}
-
-// 排序项目
-function sortProjects(projects) {
-    const sortBy = document.getElementById('sortBy').value;
-    let sorted = [...projects];
-    switch(sortBy) {
-        case 'createDate-desc':
-            sorted.sort((a, b) => (b.createDate || '').localeCompare(a.createDate || ''));
-            break;
-        case 'createDate-asc':
-            sorted.sort((a, b) => (a.createDate || '').localeCompare(b.createDate || ''));
-            break;
-        case 'expectedDate-asc':
-            sorted.sort((a, b) => (a.expectedDate || '').localeCompare(b.expectedDate || ''));
-            break;
-        case 'expectedDate-desc':
-            sorted.sort((a, b) => (b.expectedDate || '').localeCompare(a.expectedDate || ''));
-            break;
-    }
-    return sorted;
-}
-
-// 渲染看板
-function renderBoard() {    const searchText = document.getElementById('searchInput').value.toLowerCase();
-    let allProjects = getProjects();
-
-    // 搜索过滤
-    if (searchText) {
-        allProjects = allProjects.filter(p => 
-            p.name.toLowerCase().includes(searchText) || 
-            (p.description && p.description.toLowerCase().includes(searchText))
-        );
-    }
-
-    // 排序
-    let sortedProjects = sortProjects(allProjects);
-
-    // 按阶段分组：6个阶段分成6列
-    const grouped = {};
-    for (let i = 0; i < stages.length; i++) {
-        grouped[i] = [];
-    }
-    sortedProjects.forEach(p => {
-        const stage = p.stage || 0;
-        grouped[stage].push(p);
-    });
-
-    // 更新统计
-    const totalProjects = allProjects.length;
-    const completed = allProjects.filter(p => p.stage === stages.length - 1).length;
-    document.getElementById('stats').innerHTML = `
-        <span>总项目：<strong>${totalProjects}</strong></span>
-        <span>已完成：<strong>${completed}</strong></span>
-    `;
-
-    const container = document.getElementById('kanbanBoard');
-    container.innerHTML = '';
-
-    // 渲染每个阶段列
-    stages.forEach((stage, stageIdx) => {
-        const col = document.createElement('div');
-        col.className = 'kanban-column';
-        col.innerHTML = `
-            <div class="column-header">
-                <span>${escapeHtml(stage.name)}</span>
-                <span class="count-badge">${grouped[stageIdx].length}</span>
-            </div>
-        `;
-
-        if (grouped[stageIdx].length === 0) {
-            col.innerHTML += '<div class="empty-column">暂无项目</div>';
-        } else {
-            grouped[stageIdx].forEach(project => {
-                const card = document.createElement('div');
-                card.className = 'kanban-card';
-                card.draggable = true;
-
-                // 判断逾期
-                let overdueBadge = '';
-                if (project.expectedDate) {
-                    const today = new Date().toISOString().split('T')[0];
-                    if (today > project.expectedDate && project.stage !== stages.length-1) {
-                        card.classList.add('overdue');
-                        overdueBadge = '<span class="danger-badge">逾期</span>';
-                    }
-                }
-
-                // 进度条
-                const progress = project.progress || 0;
-
-                // 付款信息
-                let paymentHtml = '';
-                if (project.totalAmount > 0) {
-                    const ppList = (project.progressPayments || []).filter(p => p.percent > 0);
-                    paymentHtml = '<div class="card-payment-info">';
-                    paymentHtml += `<span>总金额：<strong>${project.totalAmount.toFixed(2)} AUD</strong></span>`;
-                    paymentHtml += `<span>已付：<span class="paid-badge">${(project.paidTotal || 0).toFixed(2)} AUD</span> | 未付：<span class="unpaid-badge">${(project.unpaidTotal || 0).toFixed(2)} AUD</span></span>`;
-                    if (ppList.length > 0) {
-                        paymentHtml += '<div style="margin-top: 4px; font-size: 11px;">';
-                        paymentHtml += ppList.map(p => 
-                            `进度${p.index} ${p.percent}% → ${p.amount.toFixed(2)} AUD ${p.paid ? '✅' : '⏳'}${p.note ? ` (${p.note})` : ''}`
-                        ).join(' · ');
-                        paymentHtml += '</div>';
-                    }
-                    paymentHtml += '</div>';
-                }
-
-                card.innerHTML = `
-                    <div class="card-title">
-                        ${escapeHtml(project.name)}
-                        ${overdueBadge}
-                    </div>
-                    <div class="card-info">
-                        <span>创建：${project.createDate || '-'}</span>
-                        <span>预期：${project.expectedDate || '-'}</span>
-                    </div>
-                    ${paymentHtml}
-                    <div class="card-progress">
-                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
-                            <span>整体进度</span>
-                            <span>${progress}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progress}%"></div>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn-success" onclick="openLogModal(${project.id})">日志</button>
-                        <button class="btn-primary" onclick="openEditModal(${project.id})">编辑</button>
-                        <button class="btn-danger" onclick="deleteProject(${project.id})">删除</button>
-                    </div>
-                `;
-
-                col.appendChild(card);
-            });
         }
 
-        container.appendChild(col);
-    });
-}
-
-// 导出数据
-function exportData() {
-    const data = getProjects();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'project-manager-backup.json';
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-// 导入数据
-function importJsonData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function() {
-        try {
-            const data = JSON.parse(reader.result);
-            if (Array.isArray(data)) {
-                saveProjects(data);
-                alert('导入成功！');
-                renderBoard();
-            } else {
-                alert('格式错误：必须是项目数组');
-            }
-        } catch(err) {
-            alert('导入失败：' + err.message);
+        // === HTML转义 ===
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"]/g, m => map[m]);
         }
-    };
-    reader.readAsText(file);
-}
-
-// 清空所有数据
-function clearAll() {
-    if (!confirm('确定要清空所有项目吗？此操作无法撤销！')) return;
-    localStorage.removeItem('project_manager_data');
-    renderBoard();
-}
-
-// 初始化绑定事件
-document.addEventListener('DOMContentLoaded', () => {
-    // 设置默认日期
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('createDate').value = today;
-
-    // 绑定工具栏事件
-    document.getElementById('addProjectBtn').addEventListener('click', openAddModal);
-    document.getElementById('closeModal').addEventListener('click', closeModal);
-    document.getElementById('cancelBtn').addEventListener('click', closeModal);
-    document.getElementById('saveBtn').addEventListener('click', saveProject);
-    document.getElementById('searchInput').addEventListener('input', renderBoard);
-    document.getElementById('sortBy').addEventListener('change', renderBoard);
-    document.getElementById('exportBtn').addEventListener('click', exportData);
-    document.getElementById('importFile').addEventListener('change', importJsonData);
-    document.getElementById('clearBtn').addEventListener('click', clearAll);
-    document.getElementById('closeLogModal').addEventListener('click', closeLogModal);
-
-    // 绑定进度款事件
-    bindProgressEvents();
-
-    // 点击背景关闭弹窗
-    document.getElementById('modal').addEventListener('click', e => {
-        if (e.target.id === 'modal') closeModal();
-    });
-    document.getElementById('logModal').addEventListener('click', e => {
-        if (e.target.id === 'logModal') closeLogModal();
-    });
-
-    // 首次渲染
-    renderBoard();
-});
-</script>
-</body>
-</html>
-    const searchText = document.getElementById('searchInput').value.toLowerCase();
-    let allProjects = getProjects();
-
-    // 搜索过滤
-    if (searchText) {
-        allProjects = allProjects.filter(p => 
-            p.name.toLowerCase().includes(searchText) || 
-            (p.description && p.description.toLowerCase().includes(searchText))
-        );
-    }
-
-    // 排序
-    let sortedProjects = sortProjects(allProjects);
-
-    // 按阶段分组：6个生产阶段分成6列
-    const grouped = {};
-    for (let i = 0; i < stages.length; i++) {
-        grouped[i] = [];
-    }
-    sortedProjects.forEach(p => {
-        const stage = p.stage || 0;
-        grouped[stage].push(p);
-    });
-
-    // 更新统计
-    const totalProjects = allProjects.length;
-    const completed = allProjects.filter(p => p.stage === stages.length - 1).length;
-    document.getElementById('stats').innerHTML = `
-        <span>总项目：<strong>${totalProjects}</strong></span>
-        <span>已完成：<strong>${completed}</strong></span>
-    `;
-
-    const container = document.getElementById('kanbanBoard');
-    container.innerHTML = '';
-
-    // 渲染每个阶段列
-    stages.forEach((stage, stageIdx) => {
-        const col = document.createElement('div');
-        col.className = 'kanban-column';
-        col.innerHTML = `
-            <div class="column-header">
-                <span>${escapeHtml(stage.name)}</span>
-                <span class="count-badge">${grouped[stageIdx].length}</span>
-            </div>
-        `;
-
-        if (grouped[stageIdx].length === 0) {
-            col.innerHTML += '<div class="empty-column">暂无项目</div>';
-        } else {
-            grouped[stageIdx].forEach(project => {
-                const card = document.createElement('div');
-                card.className = 'kanban-card';
-                card.draggable = true;
-
-                // 判断逾期
-                let overdueBadge = '';
-                if (project.expectedDate) {
-                    const today = new Date().toISOString().split('T')[0];
-                    if (today > project.expectedDate && project.stage !== stages.length-1) {
-                        card.classList.add('overdue');
-                        overdueBadge = '<span class="danger-badge">逾期</span>';
-                    }
-                }
-
-                // 进度条
-                const progress = project.progress || 0;
-
-                // 付款信息
-                let paymentHtml = '';
-                if (project.totalAmount > 0) {
-                    const ppList = (project.progressPayments || []).filter(p => p.percent > 0);
-                    paymentHtml = '<div class="card-payment-info">';
-                    paymentHtml += `<span>总金额：<strong>${project.totalAmount.toFixed(2)} AUD</strong></span>`;
-                    paymentHtml += `<span>已付：<span class="paid-badge">${(project.paidTotal || 0).toFixed(2)} AUD</span> | 未付：<span class="unpaid-badge">${(project.unpaidTotal || 0).toFixed(2)} AUD</span></span>`;
-                    if (ppList.length > 0) {
-                        paymentHtml += '<div style="margin-top: 4px; font-size: 11px;">';
-                        paymentHtml += ppList.map(p => 
-                            `进度${p.index} ${p.percent}% → ${p.amount.toFixed(2)} AUD ${p.paid ? '✅' : '⏳'}${p.note ? ` (${p.note})` : ''}`
-                        ).join(' · ');
-                        paymentHtml += '</div>';
-                    }
-                    paymentHtml += '</div>';
-                }
-
-                card.innerHTML = `
-                    <div class="card-title">
-                        ${escapeHtml(project.name)}
-                        ${overdueBadge}
-                    </div>
-                    <div class="card-info">
-                        <span>创建：${project.createDate || '-'}</span>
-                        <span>预期：${project.expectedDate || '-'}</span>
-                    </div>
-                    ${paymentHtml}
-                    <div class="card-progress">
-                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
-                            <span>整体进度</span>
-                            <span>${progress}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${progress}%"></div>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn-success" onclick="openLogModal(${project.id})">日志</button>
-                        <button class="btn-primary" onclick="openEditModal(${project.id})">编辑</button>
-                        <button class="btn-danger" onclick="deleteProject(${project.id})">删除</button>
-                    </div>
-                `;
-
-                col.appendChild(card);
-            });
-        }
-
-        container.appendChild(col);
-    });
-}
-
-// 导出数据
-function exportData() {
-    const data = getProjects();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'project-manager-backup.json';
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
-// 导入数据
-function importJsonData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function() {
-        try {
-            const data = JSON.parse(reader.result);
-            if (Array.isArray(data)) {
-                saveProjects(data);
-                alert('导入成功！');
-                renderBoard();
-            } else {
-                alert('格式错误：必须是项目数组');
-            }
-        } catch(err) {
-            alert('导入失败：' + err.message);
-        }
-    };
-    reader.readAsText(file);
-}
-
-// 清空所有数据
-function clearAll() {
-    if (!confirm('确定要清空所有项目吗？此操作无法撤销！')) return;
-    localStorage.removeItem('project_manager_data');
-    renderBoard();
-}
-
-// 初始化绑定事件
-document.addEventListener('DOMContentLoaded', () => {
-    // 设置默认日期
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('createDate').value = today;
-
-    // 绑定工具栏事件
-    document.getElementById('addProjectBtn').addEventListener('click', openAddModal);
-    document.getElementById('closeModal').addEventListener('click', closeModal);
-    document.getElementById('cancelBtn').addEventListener('click', closeModal);
-    document.getElementById('saveBtn').addEventListener('click', saveProject);
-    document.getElementById('searchInput').addEventListener('input', renderBoard);
-    document.getElementById('sortBy').addEventListener('change', renderBoard);
-    document.getElementById('exportBtn').addEventListener('click', exportData);
-    document.getElementById('importFile').addEventListener('change', importJsonData);
-    document.getElementById('clearBtn').addEventListener('click', clearAll);
-    document.getElementById('closeLogModal').addEventListener('click', closeLogModal);
-
-    // 绑定进度款事件
-    bindProgressEvents();
-
-    // 点击背景关闭弹窗
-    document.getElementById('modal').addEventListener('click', e => {
-        if (e.target.id === 'modal') closeModal();
-    });
-    document.getElementById('logModal').addEventListener('click', e => {
-        if (e.target.id === 'logModal') closeLogModal();
-    });
-
-    // 首次渲染
-    renderBoard();
-});
-</script>
+    </script>
 </body>
 </html>
