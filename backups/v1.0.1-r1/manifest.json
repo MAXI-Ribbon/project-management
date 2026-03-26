@@ -1,6 +1,7 @@
 {
   "version": "1.0.1-r1",
-  "sourceCommit": "0e7b658",
-  "createdAt": "2026-03-26T00:32:07Z",
-  "note": "post-release iteration baseline"
+  "sourceCommit": "86b7430",
+  "sourceCommitFull": "86b7430f588e3b859229726c72bf6901914c7931",
+  "createdAt": "2026-03-26T00:45:18Z",
+  "note": "Backup captured from HEAD before releasing 1.0.1-r2"
 }

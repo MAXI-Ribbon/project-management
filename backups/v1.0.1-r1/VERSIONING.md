@@ -28,6 +28,7 @@
    - 本地复制到：`backups/v当前版本/`
    - 至少保存：`index.html`、`README.md`
    - 写入 `manifest.json` 记录来源 commit 和时间
+   - 可直接运行：`./scripts/backup_version.sh <版本号> "备注"`
 
 2. **GitHub 保存原版本**
    - 为备份前的状态打 tag，例如：`v1.0.1`、`v1.0.2`

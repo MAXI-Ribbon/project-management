@@ -31,6 +31,7 @@
 - 当前页面迭代版：见页面右上角版本显示
 - 本地备份目录：`backups/`
 - 备份脚本：`./scripts/backup_version.sh <版本号> "备注"`
+- 发布脚本：`./scripts/release.sh <下一个版本号> "commit message" [--push] [--yes]`
 - 版本迭代规则与备份流程：见 `VERSIONING.md`
 
 ## 页面结构

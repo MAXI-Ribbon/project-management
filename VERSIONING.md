@@ -51,6 +51,7 @@
 5. **提交并推送到 GitHub**
    - commit message 需要写清楚修复或功能内容
    - push 前确保工作区干净、测试完成
+   - 可直接运行：`./scripts/release.sh <下一个版本号> "commit message" [--push] [--yes]`
 
 ## Codex / GitHub 改动如何并入这套系统
 
