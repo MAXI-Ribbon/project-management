@@ -1,0 +1,2109 @@
+{
+  "appVersion": "1.0.1-r3",
+  "baseReleaseVersion": "1.0.1",
+  "sourceFile": "/Users/haiyuechen/Desktop/A.xls",
+  "generatedBy": "convert_a_xls_to_project_manager.py",
+  "projects": [
+    {
+      "id": 1138000426,
+      "name": "42 Riversdale Rd Oxenford-0311-Rita-Joe",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：320的板，30%利润，包安装$11400+GST\n来源：A.xls / 2026 / 第 74 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1307101754,
+      "name": "Akira-southport-0213",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：$11900+GST\n来源：A.xls / 2026 / 第 66 行",
+      "currentStage": 0,
+      "totalAmount": 11900.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1562371043,
+      "name": "Alex-30-40 Loxley Chase Forestdale-0105",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：QU-2870，$18350+GST,石头$6700+GST\n来源：A.xls / 2026 / 第 56 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1185220902,
+      "name": "Alex-346 Richmond",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：已报价\n付款情况：50% INV-3596\n来源：A.xls / 2026 / 第 65 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": 50.0,
+          "amount": null,
+          "note": "50% INV-3596",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1630305915,
+      "name": "Besa-39 Point Avenue-0316",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：QU-2893\n来源：A.xls / 2026 / 第 75 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1405857258,
+      "name": "bingge-lot4 405 -0202",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：包安装$8450+GSt\n来源：A.xls / 2026 / 第 62 行",
+      "currentStage": 0,
+      "totalAmount": 8450.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1677896385,
+      "name": "Connie-77 Woolley st-0202",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：看图上标\n来源：A.xls / 2026 / 第 63 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1750914333,
+      "name": "Derry-32 Jennifer st-0922",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：QU-2883\n来源：A.xls / 2026 / 第 76 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1211189008,
+      "name": "Eric-0310",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：$1150+GST\n来源：A.xls / 2026 / 第 73 行",
+      "currentStage": 0,
+      "totalAmount": 1150.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1028486278,
+      "name": "Finn Hooper-Robe-0105",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：QU-2869\n来源：A.xls / 2026 / 第 55 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1152710389,
+      "name": "Jay-0119",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：Polytec soft walnut matt, titus hinge, sharknose fingerpull， 不安装，不运输，一个Bin。 总价$9300+GST\n\nB:用soft walnut ravine，外加$1400+GST\nC：blum hinge， 外加$300+GST\n来源：A.xls / 2026 / 第 58 行",
+      "currentStage": 0,
+      "totalAmount": 9300.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1538166236,
+      "name": "Joe-0317",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：色板算290， ， 总价$21600+GST 包安装\n来源：A.xls / 2026 / 第 77 行",
+      "currentStage": 0,
+      "totalAmount": 21600.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1777017105,
+      "name": "linfei-0306",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：不安装，烤漆板，不烤，总价$6500+GST\n来源：A.xls / 2026 / 第 89 行",
+      "currentStage": 0,
+      "totalAmount": 6500.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1221300776,
+      "name": "liuyang-0317",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：未确定色板\n来源：A.xls / 2026 / 第 86 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1788325482,
+      "name": "liuyang-0319",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：不安装$5050+GSt\n来源：A.xls / 2026 / 第 81 行",
+      "currentStage": 0,
+      "totalAmount": 5050.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1459699974,
+      "name": "liuzhi-breadtop-1212",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：？图纸\n来源：A.xls / 2026 / 第 69 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1824022237,
+      "name": "lot 1- 2 Delungra St Broadbeach water",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：QU-2894\n来源：A.xls / 2026 / 第 84 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1867793853,
+      "name": "lot 2- 2 Delungra St Broadbeach water",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：QU-2895\n来源：A.xls / 2026 / 第 85 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1087287378,
+      "name": "lot2-qige-0123",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n来源：A.xls / 2026 / 第 60 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1317528992,
+      "name": "Mars-0320",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：不安装，用最便宜的板，普通拉手，大概价钱$5000+GST\n来源：A.xls / 2026 / 第 87 行",
+      "currentStage": 0,
+      "totalAmount": 5000.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1785219620,
+      "name": "Max- 33 Analese st Sunnybank Hills -0318",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：不安装：$5150+GST\n安装：$7850+GST\n\n烤漆板带烤漆\n不安装：$10580+GST\n安装：$14100+GST\n来源：A.xls / 2026 / 第 78 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1200747701,
+      "name": "miss zhao-0216-job 5",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：Cleveland: 包安装$3850+GST\nFlagstone: 包安装$2660+GSt\ngraceville 1:包安装$6140+GSt\ngraceville 2:包安装$3220+GSt\n来源：A.xls / 2026 / 第 71 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1661413662,
+      "name": "miss zhao-pallara-0223",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：$15100+GSt。不要背板$14200+GSt\n来源：A.xls / 2026 / 第 70 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1006768828,
+      "name": "miss zhao-warner-0127",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：包安装，算matt finish，总价$7750+GST\n来源：A.xls / 2026 / 第 61 行",
+      "currentStage": 0,
+      "totalAmount": 7750.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1787937699,
+      "name": "Nicolas-242 Zillmere rd Zillmere-0319",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：Polytec 16mm  matt:$3250+GST\n Laminex 16mm natural: $4050+GST\n来源：A.xls / 2026 / 第 82 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1801916537,
+      "name": "Sean-0213",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：counter $3180+gst\n吊柜$470+GST\n来源：A.xls / 2026 / 第 68 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1076873922,
+      "name": "Sinba-Espresso Elegance-0109",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：QU-2877不安装\n来源：A.xls / 2026 / 第 57 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1110231533,
+      "name": "steven-0303",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：QU-2891\n来源：A.xls / 2026 / 第 72 行",
+      "currentStage": 0,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1051089179,
+      "name": "Sukh friend-0213",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：$7700+GSt matt finish\n来源：A.xls / 2026 / 第 67 行",
+      "currentStage": 0,
+      "totalAmount": 7700.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1772436988,
+      "name": "sukh-Headwood-VAR",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：$1300+GST\n来源：A.xls / 2026 / 第 80 行",
+      "currentStage": 0,
+      "totalAmount": 1300.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1191041950,
+      "name": "sukh-hillcrest-0319",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：拉手 $3550+GSt\n来源：A.xls / 2026 / 第 79 行",
+      "currentStage": 0,
+      "totalAmount": 3550.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1871563979,
+      "name": "tang-0118",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：用便宜的白色色板，\n不安装总价：$3320+GST \n安装总价: $5420+GST\n来源：A.xls / 2026 / 第 59 行",
+      "currentStage": 0,
+      "totalAmount": 3320.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1357607885,
+      "name": "Tang-0325",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：3.2M那个，普通拉手，不安装大概$2500+GST\n来源：A.xls / 2026 / 第 90 行",
+      "currentStage": 0,
+      "totalAmount": 2500.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1038381603,
+      "name": "xiaoliang-lot1-0202",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已报价\n报价：$13350+GST\n来源：A.xls / 2026 / 第 64 行",
+      "currentStage": 0,
+      "totalAmount": 13350.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已报价"
+      ]
+    },
+    {
+      "id": 1459208421,
+      "name": "17/316 LONG ST-Yang",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：图纸阶段\n付款情况：INV-3690 6600+GST 已付0319\n来源：A.xls / 2026 / 第 36 行",
+      "currentStage": 1,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": 319.0,
+          "note": "INV-3690 6600+GST 已付0319",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "图纸阶段"
+      ]
+    },
+    {
+      "id": 1182815649,
+      "name": "Besa-Lot 1, 11 Gordon Terrace Indooroopilly",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：图纸阶段\n付款情况：INV-3414 50% 0815 已付\n\n付款周期改14天\n来源：A.xls / 2026 / 第 35 行",
+      "currentStage": 1,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": 50.0,
+          "amount": null,
+          "note": "INV-3414 50% 0815 已付",
+          "paid": true
+        },
+        {
+          "percent": null,
+          "amount": null,
+          "note": "付款周期改14天",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "图纸阶段"
+      ]
+    },
+    {
+      "id": 1241087340,
+      "name": "Phoenix-lot 100 no19 executive way- Bridgeman downs",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：图纸阶段\n报价：QU-2863\n要跟进\n来源：A.xls / 2026 / 第 34 行",
+      "currentStage": 1,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "图纸阶段"
+      ]
+    },
+    {
+      "id": 1519045722,
+      "name": "5 Cumberland Ct Carina",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：准备生产\n付款情况：INV-3643\nINV-3644 paid 01-29\n来源：A.xls / 2026 / 第 30 行",
+      "currentStage": 4,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": null,
+          "note": "INV-3643",
+          "paid": false
+        },
+        {
+          "percent": null,
+          "amount": null,
+          "note": "INV-3644 paid 01-29",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "准备生产"
+      ]
+    },
+    {
+      "id": 1178786902,
+      "name": "Besa-Lot 446, Moreton Drive",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：准备生产\n来源：A.xls / 2026 / 第 32 行",
+      "currentStage": 4,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "准备生产"
+      ]
+    },
+    {
+      "id": 1363655419,
+      "name": "besa-Yvan He-Altandi 23-0723",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：准备生产\n报价：QU-2789\n付款情况：INV-3429 50% 已付\n\n付款周期改14天\n来源：A.xls / 2026 / 第 31 行",
+      "currentStage": 4,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": 50.0,
+          "amount": null,
+          "note": "INV-3429 50% 已付",
+          "paid": true
+        },
+        {
+          "percent": null,
+          "amount": null,
+          "note": "付款周期改14天",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "准备生产"
+      ]
+    },
+    {
+      "id": 1493275621,
+      "name": "11 Sankey st-darrin-401",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n付款情况：INV-3594_1 35% 已付\nINV-3691   25% \n\n3/4 安装 10%\n2 安装   10%\n1 安装   10% \n完工     10%\n来源：A.xls / 2026 / 第 17 行",
+      "currentStage": 5,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": 35.0,
+          "amount": null,
+          "note": "INV-3594_1 35% 已付",
+          "paid": true
+        },
+        {
+          "percent": 25.0,
+          "amount": null,
+          "note": "INV-3691   25%",
+          "paid": false
+        },
+        {
+          "percent": 10.0,
+          "amount": null,
+          "note": "3/4 安装 10%",
+          "paid": false
+        },
+        {
+          "percent": 10.0,
+          "amount": null,
+          "note": "2 安装   10%",
+          "paid": false
+        },
+        {
+          "percent": 10.0,
+          "amount": null,
+          "note": "1 安装   10%",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1513027157,
+      "name": "27 Brentwood Terrace -0311-Rita-Joe",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n报价：320的板，25%利润，包安装$4300+GST。石头$2500+gst+GST\n来源：A.xls / 2026 / 第 22 行",
+      "currentStage": 5,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1231498727,
+      "name": "31 Turrana st-1216",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n报价：0401897763\n付款情况：02-23 已付，$10961.5\n来源：A.xls / 2026 / 第 25 行",
+      "currentStage": 5,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": 10961.5,
+          "note": "02-23 已付，$10961.5",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1316843456,
+      "name": "83 splendour st",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等安装\n报价：xero\n付款情况：第二份账单要加上Bar的内容\n来源：A.xls / 2026 / 第 3 行",
+      "currentStage": 5,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": null,
+          "note": "第二份账单要加上Bar的内容",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等安装"
+      ]
+    },
+    {
+      "id": 1883586562,
+      "name": "Alex-lot6 no130 stanley rd camp hill",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n报价：QU-2862\n付款情况：INV-3683 50% 已付\n来源：A.xls / 2026 / 第 26 行",
+      "currentStage": 5,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": 50.0,
+          "amount": null,
+          "note": "INV-3683 50% 已付",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1847418913,
+      "name": "charlie-0320",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n报价：不安装，不组装，$4800+GSt\n来源：A.xls / 2026 / 第 27 行",
+      "currentStage": 5,
+      "totalAmount": 4800.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1899710321,
+      "name": "Di-0227",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等取货\n报价：不安装$2000+gst\n付款情况：INV-3670 已付\n来源：A.xls / 2026 / 第 10 行",
+      "currentStage": 5,
+      "totalAmount": 2000.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": null,
+          "note": "INV-3670 已付",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等取货"
+      ]
+    },
+    {
+      "id": 1198647752,
+      "name": "gaofeng-0323",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n报价：$12450+GST\n付款情况：INV-3698 50% 已付\n来源：A.xls / 2026 / 第 28 行",
+      "currentStage": 5,
+      "totalAmount": 12450.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": 50.0,
+          "amount": null,
+          "note": "INV-3698 50% 已付",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1323885716,
+      "name": "jason-0324",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等取货\n报价：$2690+GST\n来源：A.xls / 2026 / 第 15 行",
+      "currentStage": 5,
+      "totalAmount": 2690.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等取货"
+      ]
+    },
+    {
+      "id": 1598814429,
+      "name": "lot 95 no166 LAKE SERENITY BVD Helensvale-0715",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n付款情况：INV-3676 50% 0313\n\n付款周期改14天\n来源：A.xls / 2026 / 第 20 行",
+      "currentStage": 5,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": 50.0,
+          "amount": null,
+          "note": "INV-3676 50% 0313",
+          "paid": false
+        },
+        {
+          "percent": null,
+          "amount": null,
+          "note": "付款周期改14天",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1629203759,
+      "name": "Lynn-6095 lugano Drive-0904",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n报价：QU-2892\n付款情况：INV-3685 总价$9878\n\n账单：290+GST 32mm board*2\n来源：A.xls / 2026 / 第 21 行",
+      "currentStage": 5,
+      "totalAmount": 9878.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": null,
+          "note": "INV-3685 总价$9878",
+          "paid": false
+        },
+        {
+          "percent": null,
+          "amount": null,
+          "note": "账单：290+GST 32mm board*2",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1547167070,
+      "name": "miss zhao-0216jobs 5-Graceville-1",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等安装\n报价：包安装$6140+GSt\n付款情况：现金\n来源：A.xls / 2026 / 第 7 行",
+      "currentStage": 5,
+      "totalAmount": 6140.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": null,
+          "note": "现金",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等安装"
+      ]
+    },
+    {
+      "id": 1083021944,
+      "name": "Miss zhao-Ripley-0119",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等安装\n报价：$6350+GST 包石头\n付款情况：已付现金$3000\n来源：A.xls / 2026 / 第 4 行",
+      "currentStage": 5,
+      "totalAmount": 6350.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": 3000.0,
+          "note": "已付现金$3000",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等安装"
+      ]
+    },
+    {
+      "id": 1717985400,
+      "name": "miss zhao-Yamanto-Bath-0106",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等安装\n报价：包安装运输，包石头(最普通的白色带点石头)，总价$4350+GST\n付款情况：已付现金$2000\n来源：A.xls / 2026 / 第 5 行",
+      "currentStage": 5,
+      "totalAmount": 4350.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": 2000.0,
+          "note": "已付现金$2000",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等安装"
+      ]
+    },
+    {
+      "id": 1673320642,
+      "name": "Qu- lot11-0218",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等安装\n报价：包安装$10000+2050GST.\n付款情况：02-27 已付$5000现金\n来源：A.xls / 2026 / 第 6 行",
+      "currentStage": 5,
+      "totalAmount": 10000.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": 5000.0,
+          "note": "02-27 已付$5000现金",
+          "paid": true
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等安装"
+      ]
+    },
+    {
+      "id": 1847870170,
+      "name": "Sukh-21 hang RD-0130",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等取货\n付款情况：INV-3662 总价5225\n已付$2500\n\n差2725\n来源：A.xls / 2026 / 第 9 行",
+      "currentStage": 5,
+      "totalAmount": 5225.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": null,
+          "note": "INV-3662 总价5225",
+          "paid": false
+        },
+        {
+          "percent": null,
+          "amount": 2500.0,
+          "note": "已付$2500",
+          "paid": true
+        },
+        {
+          "percent": null,
+          "amount": null,
+          "note": "差2725",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等取货"
+      ]
+    },
+    {
+      "id": 1367254319,
+      "name": "sukh-waterford",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等取货\n报价：$2880+GSt\n付款情况：INV-3696\n来源：A.xls / 2026 / 第 11 行",
+      "currentStage": 5,
+      "totalAmount": 2880.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": null,
+          "note": "INV-3696",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等取货"
+      ]
+    },
+    {
+      "id": 1313501603,
+      "name": "Tang-0324",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等取货\n报价：$290+GST\n来源：A.xls / 2026 / 第 12 行",
+      "currentStage": 5,
+      "totalAmount": 290.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等取货"
+      ]
+    },
+    {
+      "id": 1710075581,
+      "name": "Terry-0209",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：已安排生产\n报价：$24750+GSt,不安装，不运送，包垃圾桶*4，Charcoal用 flint finish，kitchen 台面贴皮\n付款情况：未发\n来源：A.xls / 2026 / 第 24 行",
+      "currentStage": 5,
+      "totalAmount": 24750.0,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [
+        {
+          "percent": null,
+          "amount": null,
+          "note": "未发",
+          "paid": false
+        }
+      ],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "已安排生产"
+      ]
+    },
+    {
+      "id": 1014370165,
+      "name": "xiaoliang-0223",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等取货\n报价：不安装laundry 2080+GST\n来源：A.xls / 2026 / 第 13 行",
+      "currentStage": 5,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等取货"
+      ]
+    },
+    {
+      "id": 1407576865,
+      "name": "xiaoliang-0323",
+      "createDate": "",
+      "expectedDate": "",
+      "description": "来源状态：等取货\n报价：不安装1520+GST\n来源：A.xls / 2026 / 第 14 行\n来源状态：已报价\n报价：不安装：$1520+GST\n安装：$2250+GSt\n来源：A.xls / 2026 / 第 83 行",
+      "currentStage": 5,
+      "totalAmount": null,
+      "stageDates": {
+        "0": "",
+        "1": "",
+        "2": "",
+        "3": "",
+        "4": "",
+        "5": "",
+        "6": ""
+      },
+      "progressPayments": [],
+      "logs": [
+        {
+          "time": "2026-03-26 13:13",
+          "action": "导入A.xls",
+          "detail": "由 A.xls / 2026 工作表转换生成"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-03-26T13:13:57+10:00",
+      "sourceStatuses": [
+        "等取货",
+        "已报价"
+      ]
+    }
+  ],
+  "tempWorks": [],
+  "exportTime": "2026-03-26 13:13:57",
+  "exportTimestamp": "2026-03-26T13:13:57+10:00"
+}
