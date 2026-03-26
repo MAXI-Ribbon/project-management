@@ -840,7 +840,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.1-r3';
+        const APP_VERSION = '1.0.1-r2';
         const BASE_RELEASE_VERSION = '1.0.1';
 
         // 7个生产阶段定义
@@ -1026,208 +1026,20 @@
             }
         }
 
-        // === 数据存取 / 兼容迁移 / 智能导入 ===
-        function deepClone(value) {
-            return value == null ? value : JSON.parse(JSON.stringify(value));
-        }
-
-        function getCurrentTimestamp() {
-            return new Date().toISOString();
-        }
-
-        // === 时间工具 ===
-        function getCurrentTime() {
-            const now = new Date();
-            return now.toLocaleString('zh-CN');
-        }
-
-        function getDateStringTimestamp(dateStr) {
-            if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
-            return `${dateStr}T00:00:00.000Z`;
-        }
-
-        function parseComparableTime(value) {
-            if (value === null || value === undefined || value === '') return null;
-            if (typeof value === 'number' && Number.isFinite(value)) return value;
-            if (typeof value === 'string') {
-                const trimmed = value.trim();
-                if (!trimmed) return null;
-                if (/^\d+$/.test(trimmed)) return parseInt(trimmed, 10);
-                const parsed = Date.parse(trimmed);
-                if (!Number.isNaN(parsed)) return parsed;
-            }
-            return null;
-        }
-
-        function isFilledValue(value) {
-            if (value === null || value === undefined) return false;
-            if (typeof value === 'string') return value.trim() !== '';
-            return true;
-        }
-
-        function valuesEqual(a, b) {
-            return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
-        }
-
-        function getStageProgress(stageId) {
-            const stage = stages.find(s => s.id === Number(stageId));
-            return stage ? stage.progress : stages[0].progress;
-        }
-
-        function calculateDaysLeft(dateStr) {
-            if (!dateStr) return null;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const target = new Date(dateStr);
-            target.setHours(0, 0, 0, 0);
-            return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-        }
-
-        function generateLegacyProjectId(project, fallbackIndex = 0) {
-            const base = [project?.name || '', project?.createDate || '', project?.expectedDate || '', fallbackIndex].join('|');
-            let hash = 0;
-            for (let i = 0; i < base.length; i++) {
-                hash = ((hash << 5) - hash) + base.charCodeAt(i);
-                hash |= 0;
-            }
-            return Math.abs(hash) + 1000000000;
-        }
-
-        function normalizePaymentItem(payment) {
-            if (!payment || typeof payment !== 'object') return null;
-            const percent = isFilledValue(payment.percent) ? parseFloat(payment.percent) : null;
-            const amount = isFilledValue(payment.amount) ? parseFloat(payment.amount) : null;
-            const note = typeof payment.note === 'string' ? payment.note : '';
-            const paid = !!payment.paid;
-            if (percent === null && amount === null && !note && !paid) return null;
-            return {
-                percent: Number.isFinite(percent) ? percent : null,
-                amount: Number.isFinite(amount) ? amount : null,
-                note,
-                paid
-            };
-        }
-
-        function hasPrimaryPaymentValue(payment) {
-            return !!(payment && (isFilledValue(payment.percent) || isFilledValue(payment.amount)));
-        }
-
-        function normalizeLogEntry(log) {
-            if (!log || typeof log !== 'object') return null;
-            const time = typeof log.time === 'string' ? log.time : '';
-            const action = typeof log.action === 'string' ? log.action : '';
-            const detail = typeof log.detail === 'string' ? log.detail : '';
-            if (!time && !action && !detail) return null;
-            return { time, action, detail };
-        }
-
-        function createLogEntry(action, detail) {
-            return {
-                time: getCurrentTime(),
-                action,
-                detail
-            };
-        }
-
-        function mergeLogs(currentLogs = [], importedLogs = []) {
-            const merged = [];
-            const seen = new Set();
-            [...(Array.isArray(currentLogs) ? currentLogs : []), ...(Array.isArray(importedLogs) ? importedLogs : [])]
-                .map(normalizeLogEntry)
-                .filter(Boolean)
-                .forEach(log => {
-                    const key = JSON.stringify([log.time || '', log.action || '', log.detail || '']);
-                    if (!seen.has(key)) {
-                        seen.add(key);
-                        merged.push(log);
-                    }
-                });
-            return merged;
-        }
-
-        function normalizeProject(project, fallbackIndex = 0) {
-            const source = deepClone(project || {});
-            const rawId = source.id;
-            let id = rawId;
-            if (!isFilledValue(id)) {
-                id = generateLegacyProjectId(source, fallbackIndex);
-            } else if (typeof id === 'string') {
-                const numericId = Number(id);
-                id = Number.isFinite(numericId) ? numericId : generateLegacyProjectId(source, fallbackIndex);
-            } else if (typeof id !== 'number' || !Number.isFinite(id)) {
-                id = generateLegacyProjectId(source, fallbackIndex);
-            }
-
-            let currentStage = parseInt(source.currentStage, 10);
-            if (Number.isNaN(currentStage)) currentStage = 0;
-            currentStage = Math.max(0, Math.min(stages.length - 1, currentStage));
-
-            const stageDates = {};
-            stages.forEach((stage, index) => {
-                const rawValue = source.stageDates && typeof source.stageDates === 'object'
-                    ? (source.stageDates[index] ?? source.stageDates[String(index)] ?? '')
-                    : '';
-                stageDates[index] = typeof rawValue === 'string' ? rawValue : '';
-            });
-
-            const progressPayments = Array.isArray(source.progressPayments)
-                ? source.progressPayments.map(normalizePaymentItem)
-                : [];
-
-            const logs = Array.isArray(source.logs)
-                ? source.logs.map(normalizeLogEntry).filter(Boolean)
-                : [];
-
-            const totalAmount = isFilledValue(source.totalAmount) ? parseFloat(source.totalAmount) : null;
-            const version = Number.isFinite(Number(source.version)) ? Math.max(1, parseInt(source.version, 10)) : 1;
-            const updatedAt = source.updatedAt || source.modifiedAt || source.lastUpdatedAt || getDateStringTimestamp(source.createDate) || null;
-
-            return {
-                ...source,
-                id,
-                name: typeof source.name === 'string' ? source.name.trim() : '',
-                createDate: typeof source.createDate === 'string' ? source.createDate : '',
-                expectedDate: typeof source.expectedDate === 'string' ? source.expectedDate : '',
-                description: typeof source.description === 'string' ? source.description.trim() : '',
-                currentStage,
-                progress: getStageProgress(currentStage),
-                totalAmount: Number.isFinite(totalAmount) ? totalAmount : null,
-                stageDates,
-                progressPayments,
-                logs,
-                version,
-                updatedAt
-            };
-        }
-
-        function normalizeTempWork(tempWork, fallbackIndex = 0) {
-            const source = deepClone(tempWork || {});
-            let id = source.id;
-            if (!isFilledValue(id)) {
-                id = generateLegacyProjectId({
-                    name: source.title || '',
-                    createDate: source.date || '',
-                    expectedDate: String(fallbackIndex)
-                }, fallbackIndex);
-            }
-            return {
-                ...source,
-                id,
-                date: typeof source.date === 'string' ? source.date : '',
-                title: typeof source.title === 'string' ? source.title.trim() : '',
-                note: typeof source.note === 'string' ? source.note.trim() : '',
-                createdAt: source.createdAt || getCurrentTime(),
-                updatedAt: source.updatedAt || source.createdAt || getDateStringTimestamp(source.date) || null
-            };
-        }
-
+        // === 数据存取 带容错 ===
         function getProjects() {
             try {
                 const stored = localStorage.getItem('projects');
                 if (!stored) return [];
                 const parsed = JSON.parse(stored);
                 if (!Array.isArray(parsed)) return [];
-                return parsed.map((project, index) => normalizeProject(project, index));
+                // 确保每个项目都有必要字段
+                parsed.forEach(project => {
+                    if (!project.logs) project.logs = [];
+                    if (!project.stageDates) project.stageDates = {};
+                    if (!project.progressPayments) project.progressPayments = [];
+                });
+                return parsed;
             } catch (err) {
                 console.error('Failed to parse projects from localStorage:', err);
                 return [];
@@ -1240,7 +1052,7 @@
                 if (!stored) return [];
                 const parsed = JSON.parse(stored);
                 if (!Array.isArray(parsed)) return [];
-                return parsed.map((item, index) => normalizeTempWork(item, index));
+                return parsed;
             } catch (err) {
                 console.error('Failed to parse tempWorks from localStorage:', err);
                 return [];
@@ -1248,271 +1060,39 @@
         }
 
         function saveProjects(projects) {
-            localStorage.setItem('projects', JSON.stringify((projects || []).map((project, index) => normalizeProject(project, index))));
+            localStorage.setItem('projects', JSON.stringify(projects));
         }
 
         function saveTempWorks(tempWorks) {
-            localStorage.setItem('tempWorks', JSON.stringify((tempWorks || []).map((item, index) => normalizeTempWork(item, index))));
+            localStorage.setItem('tempWorks', JSON.stringify(tempWorks));
         }
 
-        function compareProjectFreshness(currentProject, importedProject) {
-            const currentVersion = Number(currentProject?.version);
-            const importedVersion = Number(importedProject?.version);
-            if (Number.isFinite(currentVersion) && Number.isFinite(importedVersion) && currentVersion !== importedVersion) {
-                return importedVersion > currentVersion ? 1 : -1;
-            }
-
-            const currentTime = parseComparableTime(currentProject?.updatedAt);
-            const importedTime = parseComparableTime(importedProject?.updatedAt);
-            if (currentTime !== null && importedTime !== null && currentTime !== importedTime) {
-                return importedTime > currentTime ? 1 : -1;
-            }
-            if (currentTime === null && importedTime !== null) return 1;
-            if (currentTime !== null && importedTime === null) return -1;
-            return 0;
+        // === 时间工具 ===
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleString('zh-CN');
         }
 
-        function pushConflict(conflicts, project, field, currentValue, importedValue, type = 'field', extra = {}) {
-            conflicts.push({
-                projectId: project.id,
-                projectName: project.name || `项目 ${project.id}`,
-                field,
-                currentValue: deepClone(currentValue),
-                importedValue: deepClone(importedValue),
-                type,
-                ...extra
-            });
-        }
-
-        function resolveSimpleField(currentValue, importedValue, freshness, conflicts, project, field) {
-            if (valuesEqual(currentValue, importedValue)) return deepClone(currentValue);
-            const currentFilled = isFilledValue(currentValue);
-            const importedFilled = isFilledValue(importedValue);
-            if (!currentFilled && importedFilled) return deepClone(importedValue);
-            if (currentFilled && !importedFilled) return deepClone(currentValue);
-            if (freshness > 0) return deepClone(importedValue);
-            if (freshness < 0) return deepClone(currentValue);
-            pushConflict(conflicts, project, field, currentValue, importedValue, 'field');
-            return deepClone(currentValue);
-        }
-
-        function mergeProject(oldProject, importedProject) {
-            const current = normalizeProject(oldProject);
-            const imported = normalizeProject(importedProject);
-            const freshness = compareProjectFreshness(current, imported);
-            const conflicts = [];
-            const merged = deepClone(current);
-
-            ['name', 'createDate', 'expectedDate', 'description', 'totalAmount', 'currentStage'].forEach(field => {
-                merged[field] = resolveSimpleField(current[field], imported[field], freshness, conflicts, current, field);
-            });
-            merged.progress = getStageProgress(merged.currentStage);
-
-            merged.stageDates = {};
-            stages.forEach((stage, index) => {
-                const currentValue = current.stageDates?.[index] || '';
-                const importedValue = imported.stageDates?.[index] || '';
-                if (!isFilledValue(importedValue)) {
-                    merged.stageDates[index] = currentValue;
-                    return;
-                }
-                if (!isFilledValue(currentValue) || currentValue === importedValue || freshness !== 0) {
-                    merged.stageDates[index] = importedValue;
-                    return;
-                }
-                pushConflict(conflicts, current, `stageDates.${index}`, currentValue, importedValue, 'stageDate', { stageIndex: index });
-                merged.stageDates[index] = currentValue;
-            });
-
-            const maxPaymentLength = Math.max(current.progressPayments.length, imported.progressPayments.length, 5);
-            merged.progressPayments = [];
-            for (let index = 0; index < maxPaymentLength; index++) {
-                const currentPayment = normalizePaymentItem(current.progressPayments[index]);
-                const importedPayment = normalizePaymentItem(imported.progressPayments[index]);
-                const currentHasValue = hasPrimaryPaymentValue(currentPayment);
-                const importedHasValue = hasPrimaryPaymentValue(importedPayment);
-
-                if (!importedHasValue) {
-                    merged.progressPayments[index] = currentPayment ? deepClone(currentPayment) : null;
-                    continue;
-                }
-
-                if (currentHasValue && !valuesEqual(currentPayment, importedPayment) && freshness === 0) {
-                    pushConflict(conflicts, current, `progressPayments[${index}]`, currentPayment, importedPayment, 'progressPayment', { paymentIndex: index });
-                    merged.progressPayments[index] = currentPayment ? deepClone(currentPayment) : null;
-                    continue;
-                }
-
-                merged.progressPayments[index] = normalizePaymentItem({
-                    percent: isFilledValue(importedPayment?.percent) ? importedPayment.percent : currentPayment?.percent,
-                    amount: isFilledValue(importedPayment?.amount) ? importedPayment.amount : currentPayment?.amount,
-                    note: isFilledValue(importedPayment?.note) ? importedPayment.note : (currentPayment?.note || ''),
-                    paid: importedPayment ? importedPayment.paid : !!currentPayment?.paid
-                });
-            }
-
-            merged.logs = mergeLogs(current.logs, imported.logs);
-            merged.id = current.id;
-            merged.version = Math.max(Number(current.version) || 1, Number(imported.version) || 1) + 1;
-            merged.updatedAt = getCurrentTimestamp();
-            return {
-                project: normalizeProject(merged),
-                conflicts,
-                freshness
-            };
-        }
-
-        function applyConflictChoice(project, conflict, useImported) {
-            const nextValue = deepClone(useImported ? conflict.importedValue : conflict.currentValue);
-            switch (conflict.type) {
-                case 'stageDate':
-                    if (!project.stageDates) project.stageDates = {};
-                    project.stageDates[conflict.stageIndex] = nextValue || '';
-                    break;
-                case 'progressPayment':
-                    if (!Array.isArray(project.progressPayments)) project.progressPayments = [];
-                    project.progressPayments[conflict.paymentIndex] = nextValue;
-                    break;
-                default:
-                    project[conflict.field] = nextValue;
-                    if (conflict.field === 'currentStage') {
-                        project.progress = getStageProgress(project.currentStage);
-                    }
-                    break;
-            }
-        }
-
-        function formatConflictValue(value) {
-            if (!isFilledValue(value) && value !== 0 && value !== false) return '(空)';
-            if (typeof value === 'object') return JSON.stringify(value, null, 2);
-            return String(value);
-        }
-
-        function getConflictLabel(conflict) {
-            if (conflict.type === 'stageDate') {
-                const stage = stages.find(s => s.id === conflict.stageIndex);
-                return `阶段日期 - ${stage ? stage.name : conflict.stageIndex}`;
-            }
-            if (conflict.type === 'progressPayment') {
-                return `进度款 #${conflict.paymentIndex + 1}`;
-            }
-            const labels = {
-                name: '项目名称',
-                createDate: '创建日期',
-                expectedDate: '预计完成日期',
-                description: '备注',
-                totalAmount: '总金额',
-                currentStage: '当前阶段'
-            };
-            return labels[conflict.field] || conflict.field;
-        }
-
-        function resolveImportConflicts(projects, conflicts) {
-            const mergedProjects = projects.map((project, index) => normalizeProject(project, index));
-            let keepImportedCount = 0;
-            let keepCurrentCount = 0;
-
-            conflicts.forEach((conflict, index) => {
-                const project = mergedProjects.find(item => String(item.id) === String(conflict.projectId));
-                if (!project) return;
-                const useImported = confirm(
-                    `检测到导入冲突（${index + 1}/${conflicts.length}）\n\n` +
-                    `项目：${conflict.projectName}\n` +
-                    `字段：${getConflictLabel(conflict)}\n\n` +
-                    `当前值：\n${formatConflictValue(conflict.currentValue)}\n\n` +
-                    `导入值：\n${formatConflictValue(conflict.importedValue)}\n\n` +
-                    `点击“确定”保留导入值\n点击“取消”保留当前值`
-                );
-                applyConflictChoice(project, conflict, useImported);
-                if (useImported) keepImportedCount += 1;
-                else keepCurrentCount += 1;
-            });
-
-            return {
-                projects: mergedProjects.map((project, index) => normalizeProject(project, index)),
-                keepImportedCount,
-                keepCurrentCount
-            };
-        }
-
-        function smartMergeProjects(currentProjects, importedProjects) {
-            const mergedProjects = (currentProjects || []).map((project, index) => normalizeProject(project, index));
-            const conflicts = [];
-            const stats = {
-                added: 0,
-                merged: 0,
-                importedNewer: 0,
-                currentNewer: 0,
-                undetermined: 0
-            };
-
-            (importedProjects || []).forEach((project, index) => {
-                const imported = normalizeProject(project, index);
-                const existingIndex = mergedProjects.findIndex(item => String(item.id) === String(imported.id));
-                if (existingIndex === -1) {
-                    const newProject = normalizeProject({
-                        ...imported,
-                        updatedAt: imported.updatedAt || getCurrentTimestamp(),
-                        version: Math.max(Number(imported.version) || 1, 1)
-                    }, index);
-                    mergedProjects.unshift(newProject);
-                    stats.added += 1;
-                    return;
-                }
-
-                const result = mergeProject(mergedProjects[existingIndex], imported);
-                mergedProjects[existingIndex] = result.project;
-                conflicts.push(...result.conflicts);
-                stats.merged += 1;
-                if (result.freshness > 0) stats.importedNewer += 1;
-                else if (result.freshness < 0) stats.currentNewer += 1;
-                else stats.undetermined += 1;
-            });
-
-            return {
-                projects: mergedProjects.map((project, index) => normalizeProject(project, index)),
-                conflicts,
-                stats
-            };
-        }
-
-        function compareTempWorkFreshness(currentWork, importedWork) {
-            const currentTime = parseComparableTime(currentWork?.updatedAt || currentWork?.createdAt);
-            const importedTime = parseComparableTime(importedWork?.updatedAt || importedWork?.createdAt);
-            if (currentTime !== null && importedTime !== null && currentTime !== importedTime) {
-                return importedTime > currentTime ? 1 : -1;
-            }
-            if (currentTime === null && importedTime !== null) return 1;
-            if (currentTime !== null && importedTime === null) return -1;
-            return 0;
-        }
-
-        function mergeTempWorks(currentTempWorks, importedTempWorks) {
-            const merged = (currentTempWorks || []).map((item, index) => normalizeTempWork(item, index));
-            (importedTempWorks || []).forEach((item, index) => {
-                const imported = normalizeTempWork(item, index);
-                const existingIndex = merged.findIndex(work => String(work.id) === String(imported.id));
-                if (existingIndex === -1) {
-                    merged.push(imported);
-                    return;
-                }
-                const freshness = compareTempWorkFreshness(merged[existingIndex], imported);
-                if (freshness > 0) {
-                    merged[existingIndex] = imported;
-                }
-            });
-            return merged;
+        function calculateDaysLeft(dateStr) {
+            if (!dateStr) return null;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const target = new Date(dateStr);
+            target.setHours(0, 0, 0, 0);
+            return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
         }
 
         // === 日志 ===
         function addLog(projectId, action, detail) {
             const projects = getProjects();
-            const project = projects.find(p => String(p.id) === String(projectId));
+            const project = projects.find(p => p.id === projectId);
             if (!project) return;
             if (!project.logs) project.logs = [];
-            project.logs.unshift(createLogEntry(action, detail));
-            project.updatedAt = getCurrentTimestamp();
-            project.version = Math.max(Number(project.version) || 1, 1) + 1;
+            project.logs.unshift({
+                time: getCurrentTime(),
+                action: action,
+                detail: detail
+            });
             saveProjects(projects);
         }
 
@@ -1654,7 +1234,6 @@
         function saveProject() {
             const projects = getProjects();
             const editId = document.getElementById('editId').value;
-            const existingProject = editId ? projects.find(p => String(p.id) === String(editId)) : null;
 
             // 收集各阶段日期
             const stageDates = {};
@@ -1662,25 +1241,26 @@
                 stageDates[i] = document.getElementById(`stageDate_${i}`).value || '';
             });
 
-            // 收集进度款 - 保留索引语义，空位用 null 占位
+            // 收集进度款 - 只保存有数据的项，空项跳过不保存
             const progressPayments = [];
             for (let i = 0; i < 5; i++) {
                 const percent = document.getElementById(`paymentPercent_${i}`).value;
                 const amount = document.getElementById(`paymentAmount_${i}`).value;
                 const note = document.getElementById(`paymentNote_${i}`).value;
                 const paid = document.getElementById(`paymentPaid_${i}`).checked;
-                progressPayments[i] = normalizePaymentItem({
-                    percent: percent ? parseFloat(percent) : null,
-                    amount: amount ? parseFloat(amount) : null,
-                    note,
-                    paid
-                });
+                if (percent || amount) {
+                    progressPayments.push({
+                        percent: percent ? parseFloat(percent) : null,
+                        amount: amount ? parseFloat(amount) : null,
+                        note: note,
+                        paid: paid
+                    });
+                }
             }
 
-            const currentStage = parseInt(document.getElementById('currentStage').value, 10);
-            const nowTimestamp = getCurrentTimestamp();
-            const project = normalizeProject({
-                id: existingProject ? existingProject.id : Date.now(),
+            const currentStage = parseInt(document.getElementById('currentStage').value);
+            const project = {
+                id: editId ? parseInt(editId) : Date.now(),
                 name: document.getElementById('projectName').value.trim(),
                 createDate: document.getElementById('createDate').value || new Date().toISOString().split('T')[0],
                 expectedDate: document.getElementById('expectedDate').value,
@@ -1689,24 +1269,24 @@
                 totalAmount: document.getElementById('totalAmount').value ? parseFloat(document.getElementById('totalAmount').value) : null,
                 description: document.getElementById('description').value.trim(),
                 stageDates: stageDates,
-                progressPayments: progressPayments,
-                logs: existingProject ? (existingProject.logs || []) : [],
-                version: existingProject ? (Math.max(Number(existingProject.version) || 1, 1) + 1) : 1,
-                updatedAt: nowTimestamp
-            });
+                progressPayments: progressPayments
+            };
 
-            if (existingProject) {
-                const index = projects.findIndex(p => String(p.id) === String(project.id));
+            if (editId) {
+                const index = projects.findIndex(p => p.id === project.id);
                 if (index >= 0) {
-                    project.logs = [
-                        createLogEntry('编辑项目', `修改为 ${stages[currentStage].name}`),
-                        ...(existingProject.logs || [])
-                    ];
-                    projects[index] = normalizeProject(project);
+                    // 保留原有日志
+                    project.logs = projects[index].logs || [];
+                    projects[index] = project;
+                    addLog(project.id, '编辑项目', `修改为 ${stages[currentStage].name}`);
                 }
             } else {
-                project.logs = [createLogEntry('创建项目', `初始阶段 ${stages[currentStage].name}`)];
-                projects.unshift(normalizeProject(project));
+                project.logs = [{
+                    time: getCurrentTime(),
+                    action: '创建项目',
+                    detail: `初始阶段 ${stages[currentStage].name}`
+                }];
+                projects.unshift(project);
             }
 
             saveProjects(projects);
@@ -1726,16 +1306,13 @@
 
         function moveToStage(projectId, newStage) {
             const projects = getProjects();
-            const project = projects.find(p => String(p.id) === String(projectId));
+            const project = projects.find(p => p.id === projectId);
             if (project) {
                 const oldStageName = stages[project.currentStage].name;
                 const newStageName = stages[newStage].name;
                 project.currentStage = newStage;
                 project.progress = stages[newStage].progress;
-                project.updatedAt = getCurrentTimestamp();
-                project.version = Math.max(Number(project.version) || 1, 1) + 1;
-                if (!project.logs) project.logs = [];
-                project.logs.unshift(createLogEntry('移动阶段', `${oldStageName} → ${newStageName}`));
+                addLog(projectId, '移动阶段', `${oldStageName} → ${newStageName}`);
                 saveProjects(projects);
                 renderCurrentPage();
                 updateStats();
@@ -2386,12 +1963,9 @@
         // === 导出导入 ===
         function exportData() {
             const data = {
-                appVersion: APP_VERSION,
-                baseReleaseVersion: BASE_RELEASE_VERSION,
                 projects: getProjects(),
                 tempWorks: getTempWorks(),
-                exportTime: getCurrentTime(),
-                exportTimestamp: getCurrentTimestamp()
+                exportTime: getCurrentTime()
             };
             const json = JSON.stringify(data, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
@@ -2430,44 +2004,26 @@
                     if (!Array.isArray(projects)) projects = [];
                     if (!Array.isArray(tempWorks)) tempWorks = [];
 
-                    const currentProjects = getProjects();
-                    const currentTempWorks = getTempWorks();
-                    const mergeResult = smartMergeProjects(currentProjects, projects);
-                    const mergedTempWorks = mergeTempWorks(currentTempWorks, tempWorks);
+                    // 补全每个项目的默认字段
+                    projects.forEach(project => {
+                        if (!project.logs) project.logs = [];
+                        if (!project.stageDates) project.stageDates = {};
+                        if (!project.progressPayments) project.progressPayments = [];
+                    });
 
-                    if (!confirm(
-                        `确认智能导入？\n\n` +
-                        `导入项目：${projects.length}\n` +
-                        `新增项目：${mergeResult.stats.added}\n` +
-                        `合并项目：${mergeResult.stats.merged}\n` +
-                        `冲突数量：${mergeResult.conflicts.length}\n` +
-                        `临时工作（导入）：${tempWorks.length}\n\n` +
-                        `说明：不会直接覆盖现有全部数据，而是按 id 去重并尝试自动合并。`
-                    )) {
-                        event.target.value = '';
+                    if (!confirm(`确认导入？\n项目数量：${projects.length}\n临时工作：${tempWorks.length}\n这会覆盖现有数据！`)) {
                         return;
                     }
 
-                    const conflictResolution = resolveImportConflicts(mergeResult.projects, mergeResult.conflicts);
-
-                    saveProjects(conflictResolution.projects);
-                    saveTempWorks(mergedTempWorks);
+                    saveProjects(projects);
+                    saveTempWorks(tempWorks);
                     renderCurrentPage();
                     updateStats();
-                    renderCalendar();
-                    alert(
-                        `导入完成！\n\n` +
-                        `新增项目：${mergeResult.stats.added}\n` +
-                        `合并项目：${mergeResult.stats.merged}\n` +
-                        `冲突手动保留导入：${conflictResolution.keepImportedCount}\n` +
-                        `冲突手动保留当前：${conflictResolution.keepCurrentCount}\n` +
-                        `临时工作总数：${mergedTempWorks.length}`
-                    );
+                    alert('导入成功！');
                     event.target.value = '';
                 } catch (err) {
                     console.error('Import failed:', err);
                     alert('导入失败：文件格式不正确\n' + err.message);
-                    event.target.value = '';
                 }
             };
             reader.readAsText(file);
