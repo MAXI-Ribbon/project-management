@@ -184,6 +184,7 @@ class ProjectRecord:
             'expectedDate': self.expected_date,
             'description': '\n'.join(description_lines).strip(),
             'currentStage': self.current_stage,
+            'projectFlag': '',
             'totalAmount': self.total_amount,
             'stageDates': {str(i): '' for i in range(7)},
             'progressPayments': self.progress_payments[:5],
@@ -326,7 +327,7 @@ def convert(source: Path = DEFAULT_SOURCE, output: Path = DEFAULT_OUTPUT, report
     output_projects.sort(key=lambda item: (item['currentStage'], item['name'].lower()))
 
     payload = {
-        'appVersion': '1.0.1-r3',
+        'appVersion': '1.0.1-r4',
         'baseReleaseVersion': '1.0.1',
         'sourceFile': str(source),
         'generatedBy': 'convert_a_xls_to_project_manager.py',

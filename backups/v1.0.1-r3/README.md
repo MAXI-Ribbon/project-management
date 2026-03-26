@@ -15,8 +15,7 @@
 - 清空数据
 - 添加当日临时工作
 - 记录修改日志
-- 录入项目名称、创建日期、预期完成日期、各阶段计划日期、当前阶段、项目状态标签（正常 / 跟进 / On Hold）、项目总金额、进度款和备注/联系人信息等字段。 [oai_citation:1‡GitHub](https://raw.githubusercontent.com/MAXI-Ribbon/project-management/refs/heads/main/index.html)
-- 支持按项目状态标签快速筛选，并在列表 / 看板中显示“跟进”“On Hold”标签。
+- 录入项目名称、创建日期、预期完成日期、各阶段计划日期、当前阶段、项目总金额、进度款和备注/联系人信息等字段。 [oai_citation:1‡GitHub](https://raw.githubusercontent.com/MAXI-Ribbon/project-management/refs/heads/main/index.html)
 
 ## 项目特点
 

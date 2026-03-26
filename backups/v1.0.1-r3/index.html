@@ -260,65 +260,6 @@
             font-weight: 600;
         }
 
-        .project-flag-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 8px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 600;
-            line-height: 1.4;
-            margin-left: 8px;
-            white-space: nowrap;
-        }
-
-        .flag-normal {
-            background: #f5f5f5;
-            color: #666;
-        }
-
-        .flag-follow_up {
-            background: #fff7e6;
-            color: #d46b08;
-        }
-
-        .flag-on_hold {
-            background: #fffbe6;
-            color: #ad8b00;
-        }
-
-        .list-title-row, .card-title-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .card-title-row {
-            margin-bottom: 6px;
-        }
-
-        .card-title {
-            margin-bottom: 0;
-        }
-
-        .card-badge-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-        }
-
-        .card-badge-row .project-flag-badge {
-            margin-left: 0;
-        }
-
-        .list-title-row .project-flag-badge {
-            margin-left: 0;
-        }
-
         .card-actions {
             margin-top: 8px;
             display: flex;
@@ -744,12 +685,6 @@
                 <option value="calendar">日历视图</option>
             </select>
             <input type="text" id="searchInput" placeholder="🔍 搜索项目...">
-            <select id="flagFilter">
-                <option value="all">全部状态</option>
-                <option value="normal">正常</option>
-                <option value="follow_up">跟进</option>
-                <option value="on_hold">On Hold</option>
-            </select>
             <button class="btn-primary" id="addProjectBtn">+ 添加项目</button>
             <button class="btn-success" id="exportBtn">导出数据</button>
             <label for="importFile" class="btn-success" style="display: inline-block; cursor: pointer; line-height: normal; height: 34px; box-sizing: border-box;">导入备份</label>
@@ -853,15 +788,6 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="projectFlag">项目状态标签</label>
-                        <select id="projectFlag">
-                            <option value="">正常</option>
-                            <option value="follow_up">跟进</option>
-                            <option value="on_hold">On Hold</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label for="description">备注 / 联系人信息</label>
                         <textarea id="description" placeholder="输入联系人电话、备注信息等"></textarea>
                     </div>
@@ -914,7 +840,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.1-r4';
+        const APP_VERSION = '1.0.1-r3';
         const BASE_RELEASE_VERSION = '1.0.1';
 
         // 7个生产阶段定义
@@ -1023,7 +949,6 @@
             document.getElementById('importFile').addEventListener('change', importJsonData);
             document.getElementById('clearBtn').addEventListener('click', clearAll);
             document.getElementById('searchInput').addEventListener('input', renderCurrentPage);
-            document.getElementById('flagFilter').addEventListener('change', renderCurrentPage);
             document.getElementById('prevCalendar').addEventListener('click', prevCalendar);
             document.getElementById('nextCalendar').addEventListener('click', nextCalendar);
             document.getElementById('calendarView').addEventListener('change', (e) => {
@@ -1149,52 +1074,6 @@
             return stage ? stage.progress : stages[0].progress;
         }
 
-        function normalizeProjectFlag(value) {
-            const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
-            if (normalized === 'follow_up' || normalized === 'followup' || normalized === '跟进') return 'follow_up';
-            if (normalized === 'on_hold' || normalized === 'on hold' || normalized === 'hold') return 'on_hold';
-            return '';
-        }
-
-        function getProjectFlagLabel(flag) {
-            const normalized = normalizeProjectFlag(flag);
-            if (normalized === 'follow_up') return '跟进';
-            if (normalized === 'on_hold') return 'On Hold';
-            return '正常';
-        }
-
-        function getProjectFlagClass(flag) {
-            const normalized = normalizeProjectFlag(flag);
-            return normalized ? `flag-${normalized}` : 'flag-normal';
-        }
-
-        function renderProjectFlagBadge(flag) {
-            const normalized = normalizeProjectFlag(flag);
-            if (!normalized) return '';
-            return `<span class="project-flag-badge ${getProjectFlagClass(normalized)}">${escapeHtml(getProjectFlagLabel(normalized))}</span>`;
-        }
-
-        function projectMatchesFilters(project, searchText, flagFilter) {
-            const normalizedFlag = normalizeProjectFlag(project?.projectFlag);
-            const selectedFlag = normalizeProjectFlag(flagFilter === 'normal' ? '' : flagFilter);
-            const matchesFlag = flagFilter === 'all'
-                ? true
-                : flagFilter === 'normal'
-                    ? normalizedFlag === ''
-                    : normalizedFlag === selectedFlag;
-            if (!matchesFlag) return false;
-
-            if (!searchText) return true;
-            const haystacks = [
-                project?.name || '',
-                project?.description || '',
-                getProjectFlagLabel(normalizedFlag),
-                normalizedFlag.replace('_', ' '),
-                (stages[project?.currentStage] && stages[project.currentStage].name) || ''
-            ].map(value => String(value).toLowerCase());
-            return haystacks.some(value => value.includes(searchText));
-        }
-
         function calculateDaysLeft(dateStr) {
             if (!dateStr) return null;
             const today = new Date();
@@ -1310,7 +1189,6 @@
                 createDate: typeof source.createDate === 'string' ? source.createDate : '',
                 expectedDate: typeof source.expectedDate === 'string' ? source.expectedDate : '',
                 description: typeof source.description === 'string' ? source.description.trim() : '',
-                projectFlag: normalizeProjectFlag(source.projectFlag),
                 currentStage,
                 progress: getStageProgress(currentStage),
                 totalAmount: Number.isFinite(totalAmount) ? totalAmount : null,
@@ -1425,7 +1303,7 @@
             const conflicts = [];
             const merged = deepClone(current);
 
-            ['name', 'createDate', 'expectedDate', 'description', 'totalAmount', 'currentStage', 'projectFlag'].forEach(field => {
+            ['name', 'createDate', 'expectedDate', 'description', 'totalAmount', 'currentStage'].forEach(field => {
                 merged[field] = resolveSimpleField(current[field], imported[field], freshness, conflicts, current, field);
             });
             merged.progress = getStageProgress(merged.currentStage);
@@ -1524,8 +1402,7 @@
                 expectedDate: '预计完成日期',
                 description: '备注',
                 totalAmount: '总金额',
-                currentStage: '当前阶段',
-                projectFlag: '项目状态标签'
+                currentStage: '当前阶段'
             };
             return labels[conflict.field] || conflict.field;
         }
@@ -1726,7 +1603,6 @@
             }
 
             document.getElementById('currentStage').value = '0';
-            document.getElementById('projectFlag').value = '';
             updateTotalSummary();
             document.getElementById('modal').classList.add('show');
         }
@@ -1743,7 +1619,6 @@
             document.getElementById('expectedDate').value = project.expectedDate || '';
             document.getElementById('totalAmount').value = project.totalAmount || '';
             document.getElementById('currentStage').value = project.currentStage || 0;
-            document.getElementById('projectFlag').value = normalizeProjectFlag(project.projectFlag);
             document.getElementById('description').value = project.description || '';
 
             stages.forEach((s, i) => {
@@ -1803,7 +1678,6 @@
             }
 
             const currentStage = parseInt(document.getElementById('currentStage').value, 10);
-            const projectFlag = normalizeProjectFlag(document.getElementById('projectFlag').value);
             const nowTimestamp = getCurrentTimestamp();
             const project = normalizeProject({
                 id: existingProject ? existingProject.id : Date.now(),
@@ -1811,7 +1685,6 @@
                 createDate: document.getElementById('createDate').value || new Date().toISOString().split('T')[0],
                 expectedDate: document.getElementById('expectedDate').value,
                 currentStage: currentStage,
-                projectFlag,
                 progress: stages[currentStage].progress,
                 totalAmount: document.getElementById('totalAmount').value ? parseFloat(document.getElementById('totalAmount').value) : null,
                 description: document.getElementById('description').value.trim(),
@@ -1825,21 +1698,14 @@
             if (existingProject) {
                 const index = projects.findIndex(p => String(p.id) === String(project.id));
                 if (index >= 0) {
-                    const logs = [
+                    project.logs = [
                         createLogEntry('编辑项目', `修改为 ${stages[currentStage].name}`),
                         ...(existingProject.logs || [])
                     ];
-                    if (normalizeProjectFlag(existingProject.projectFlag) !== projectFlag) {
-                        logs.unshift(createLogEntry('更新项目状态', `${getProjectFlagLabel(existingProject.projectFlag)} → ${getProjectFlagLabel(projectFlag)}`));
-                    }
-                    project.logs = logs;
                     projects[index] = normalizeProject(project);
                 }
             } else {
                 project.logs = [createLogEntry('创建项目', `初始阶段 ${stages[currentStage].name}`)];
-                if (projectFlag) {
-                    project.logs.unshift(createLogEntry('设置项目状态', getProjectFlagLabel(projectFlag)));
-                }
                 projects.unshift(normalizeProject(project));
             }
 
@@ -1895,9 +1761,12 @@
         // === 项目列表视图 ===
         function renderList() {
             const projects = getProjects();
-            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
-            const flagFilter = document.getElementById('flagFilter').value;
-            const filtered = projects.filter(project => projectMatchesFilters(project, searchText, flagFilter));
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = projects.filter(p => 
+                !searchText || 
+                p.name.toLowerCase().includes(searchText) || 
+                (p.description && p.description.toLowerCase().includes(searchText))
+            );
 
             // 按预期完成日期排序
             filtered.sort((a, b) => {
@@ -1914,7 +1783,6 @@
 
             container.innerHTML = filtered.map(project => {
                 const stageInfo = stages[project.currentStage];
-                const flagBadge = renderProjectFlagBadge(project.projectFlag);
 
                 // 计算付款统计
                 let paidTotal = 0;
@@ -1938,10 +1806,7 @@
                 return `
                     <div class="list-item">
                         <div class="list-info">
-                            <div class="list-title-row">
-                                <div class="list-name">${escapeHtml(project.name)}</div>
-                                ${flagBadge}
-                            </div>
+                            <div class="list-name">${escapeHtml(project.name)}</div>
                             <div class="list-meta">
                                 当前阶段：${stageInfo.name} | 进度：${stageInfo.progress}% 
                                 ${project.expectedDate ? `| 预期完成：${project.expectedDate}` : ''}
@@ -1963,9 +1828,12 @@
         // === 看板视图 ===
         function renderBoard() {
             const projects = getProjects();
-            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
-            const flagFilter = document.getElementById('flagFilter').value;
-            const filtered = projects.filter(project => projectMatchesFilters(project, searchText, flagFilter));
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = projects.filter(p => 
+                !searchText || 
+                p.name.toLowerCase().includes(searchText) || 
+                (p.description && p.description.toLowerCase().includes(searchText))
+            );
 
             // 按阶段分组
             const grouped = {};
@@ -2016,10 +1884,10 @@
                             badge = `<span class="danger-badge">剩余 ${daysLeft} 天</span>`;
                         }
 
-                        const flagBadge = renderProjectFlagBadge(project.projectFlag);
                         let isOverdue = daysLeft !== null && daysLeft < 0;
                         card.className += isOverdue ? ' overdue' : '';
 
+                        // 计算付款信息
                         let paidTotal = 0;
                         if (project.progressPayments && project.totalAmount) {
                             project.progressPayments.forEach(p => {
@@ -2037,14 +1905,12 @@
                         }
 
                         card.innerHTML = `
-                            <div class="card-title-row">
-                                <div class="card-title">${escapeHtml(project.name)}</div>
-                            </div>
+                            <div class="card-title">${escapeHtml(project.name)}</div>
                             <div class="card-info">
                                 <span>阶段：${stage.name}</span>
                                 ${currentDate ? `<span class="card-stage-date">${currentDate}</span>` : ''}
                             </div>
-                            ${(badge || flagBadge) ? `<div class="card-badge-row">${badge}${flagBadge}</div>` : ''}
+                            ${badge}
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${stage.progress}%"></div>
                             </div>
@@ -2057,6 +1923,7 @@
                                 <button class="btn-danger" onclick="deleteProject(${project.id})">删除</button>
                             </div>
                         `;
+                        // 拖拽事件
                         card.addEventListener('dragstart', (e) => {
                             draggedProject = project;
                             card.classList.add('dragging');
@@ -2071,6 +1938,7 @@
                     });
                 }
 
+                // 放置目标
                 column.addEventListener('dragover', (e) => {
                     e.preventDefault();
                 });
@@ -2619,14 +2487,10 @@
             const projects = getProjects();
             const total = projects.length;
             const completed = projects.filter(p => p.currentStage === 6).length;
-            const followUp = projects.filter(p => normalizeProjectFlag(p.projectFlag) === 'follow_up').length;
-            const onHold = projects.filter(p => normalizeProjectFlag(p.projectFlag) === 'on_hold').length;
             document.getElementById('stats').innerHTML = `
                 <span>总数：${total}</span>
                 <span>待完成：${total - completed}</span>
                 <span>已完成：${completed}</span>
-                <span>跟进：${followUp}</span>
-                <span>On Hold：${onHold}</span>
             `;
         }
 
