@@ -25,14 +25,6 @@
 - **适合内部使用**：适合个人、小团队或现场项目追踪
 - **支持本地数据备份**：可导出/导入项目数据，便于迁移和恢复。页面中已提供“导出数据”和“导入备份”入口。 [oai_citation:2‡GitHub](https://raw.githubusercontent.com/MAXI-Ribbon/project-management/refs/heads/main/index.html)
 
-## 版本与备份
-
-- 当前正式版基线：`1.0.1`
-- 当前页面迭代版：见页面右上角版本显示
-- 本地备份目录：`backups/`
-- 备份脚本：`./scripts/backup_version.sh <版本号> "备注"`
-- 版本迭代规则与备份流程：见 `VERSIONING.md`
-
 ## 页面结构
 
 ### 1. 项目列表

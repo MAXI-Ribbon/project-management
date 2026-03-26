@@ -25,23 +25,8 @@
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 4px;
-            font-size: 24px;
-        }
-
-        .page-title {
-            position: relative;
             margin-bottom: 15px;
-        }
-
-        .version-info {
-            position: absolute;
-            right: 0;
-            bottom: 2px;
-            font-size: 11px;
-            color: #9aa1ab;
-            letter-spacing: 0.2px;
-            user-select: none;
+            font-size: 24px;
         }
 
         .toolbar {
@@ -660,22 +645,12 @@
             .progress-payment-item {
                 grid-template-columns: 1fr 1fr;
             }
-
-            .version-info {
-                position: static;
-                display: block;
-                text-align: center;
-                margin-top: 2px;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="page-title">
-            <h1>📋 生产项目管理</h1>
-            <div class="version-info" id="versionInfo"></div>
-        </div>
+        <h1>📋 生产项目管理</h1>
 
         <!-- 工具栏 -->
         <div class="toolbar">
@@ -840,9 +815,6 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.1-r1';
-        const BASE_RELEASE_VERSION = '1.0.1';
-
         // 7个生产阶段定义
         const stages = [
             { id: 0, name: '报价', progress: Math.round(100/7*1) },
@@ -864,8 +836,6 @@
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('versionInfo').textContent = `v${APP_VERSION} · base ${BASE_RELEASE_VERSION}`;
-
             // 设置今天日期（修复时区偏移）
             const today = new Date();
             // 修复时区偏移：获取本地日期正确的ISO字符串
