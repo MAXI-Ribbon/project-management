@@ -165,6 +165,31 @@
             gap: 12px;
         }
 
+        /* 配送方式标签样式 */
+        .delivery-type-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 6px;
+        }
+        .delivery-type-badge.delivery-self {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+        .delivery-type-badge.delivery-delivery {
+            background: #f0f5ff;
+            color: #2f54eb;
+            border: 1px solid #adc6ff;
+        }
+        .delivery-type-badge.delivery-install {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
         .kanban-column {
             background: white;
             border-radius: 8px;
@@ -477,6 +502,12 @@
             background: #f0f5ff;
             color: #531dab;
             border-left-color: #85a5ff;
+        }
+
+        .calendar-event.project.calendar-event-stage-7 {
+            background: #f9f0ff;
+            color: #722ed1;
+            border-left-color: #b37feb;
         }
 
         .calendar-event.project.calendar-event-stage-expected {
@@ -1048,6 +1079,33 @@
                     <div class="list-name">Delivered 已交付</div>
                     <span class="list-meta">已交付项目在此页面集中管理。</span>
                 </div>
+                <div class="delivered-filters" style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <label style="margin: 0; font-size: 13px;">开始日期：</label>
+                        <input type="date" id="deliveredDateStart" style="padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <label style="margin: 0; font-size: 13px;">结束日期：</label>
+                        <input type="date" id="deliveredDateEnd" style="padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <label style="margin: 0; font-size: 13px;">付款状态：</label>
+                        <select id="deliveredPaymentFilter" style="padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="all">全部</option>
+                            <option value="paid">已付清</option>
+                            <option value="unpaid">未付清</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <label style="margin: 0; font-size: 13px;">排序：</label>
+                        <select id="deliveredSortBy" style="padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="deliveredDate-desc">交付日期 → 新→旧</option>
+                            <option value="deliveredDate-asc">交付日期 → 旧→新</option>
+                            <option value="totalAmount-desc">总金额 → 高→低</option>
+                            <option value="unpaid-desc">未收款 → 高→低</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="deliveredSummaryContainer" class="delivered-summary"></div>
                 <div id="deliveredProjectsContainer"></div>
             </div>
@@ -1106,6 +1164,16 @@
                                 <strong id="unpaidTotal" style="color: #cf1322;">$0.00</strong>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deliveryType">配送方式</label>
+                        <select id="deliveryType">
+                            <option value="">无</option>
+                            <option value="自取">自取</option>
+                            <option value="送货">送货</option>
+                            <option value="安装">安装</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -1194,18 +1262,19 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.1.0';
+        const APP_VERSION = '1.2.0-beta1';
         const BASE_RELEASE_VERSION = '1.1.0';
 
         // 7个生产阶段定义
         const stages = [
-            { id: 0, name: '报价', progress: Math.round(100/7*1) },
-            { id: 1, name: '画图', progress: Math.round(100/7*2) },
-            { id: 2, name: '对图', progress: Math.round(100/7*3) },
-            { id: 3, name: '量尺', progress: Math.round(100/7*4) },
-            { id: 4, name: '排产', progress: Math.round(100/7*5) },
-            { id: 5, name: '组装', progress: Math.round(100/7*6) },
-            { id: 6, name: 'Delivered', progress: 100 }
+            { id: 0, name: '报价', progress: Math.round(100/8*1) },
+            { id: 1, name: '画图', progress: Math.round(100/8*2) },
+            { id: 2, name: '对图', progress: Math.round(100/8*3) },
+            { id: 3, name: '量尺', progress: Math.round(100/8*4) },
+            { id: 4, name: '排产', progress: Math.round(100/8*5) },
+            { id: 5, name: '组装', progress: Math.round(100/8*6) },
+            { id: 6, name: '配送', progress: Math.round(100/8*7) },
+            { id: 7, name: 'Delivered', progress: 100 }
         ];
 
         const kanbanStages = stages.filter(stage => stage.id !== 6);
@@ -1219,7 +1288,8 @@
             3: 'calendar-event-stage-3',
             4: 'calendar-event-stage-4',
             5: 'calendar-event-stage-5',
-            6: 'calendar-event-stage-6'
+            6: 'calendar-event-stage-6',
+            7: 'calendar-event-stage-7'
         };
 
         let draggedProject = null;
@@ -1320,6 +1390,10 @@
             document.getElementById('flagFilter').addEventListener('change', renderCurrentPage);
             document.getElementById('orderItemStatusFilter').addEventListener('change', renderOrderPage);
             document.getElementById('addOrderRowBtn').addEventListener('click', () => addOrderRow());
+            // Delivered 页面筛选排序事件
+            ['deliveredDateStart', 'deliveredDateEnd', 'deliveredPaymentFilter', 'deliveredSortBy'].forEach(id => {
+                document.getElementById(id).addEventListener('change', renderDeliveredPage);
+            });
             document.getElementById('prevCalendar').addEventListener('click', prevCalendar);
             document.getElementById('nextCalendar').addEventListener('click', nextCalendar);
             document.getElementById('calendarView').addEventListener('change', (e) => {
@@ -1610,6 +1684,16 @@
             return ORDER_STATUSES.includes(status) ? status : '未定';
         }
 
+        // 渲染配送方式标签
+        function renderDeliveryTypeBadge(deliveryType) {
+            if (!deliveryType) return '';
+            let cssClass = '';
+            if (deliveryType === '自取') cssClass = 'delivery-self';
+            else if (deliveryType === '送货') cssClass = 'delivery-delivery';
+            else if (deliveryType === '安装') cssClass = 'delivery-install';
+            return `<span class="delivery-type-badge ${cssClass}">${escapeHtml(deliveryType)}</span>`;
+        }
+
         function projectHasOrderData(project) {
             if (!project) return false;
             const items = Array.isArray(project.orderItems) ? project.orderItems : [];
@@ -1706,6 +1790,12 @@
             const orderItems = normalizeOrderItems(source.orderItems);
             const orderStatus = normalizeOrderStatus(source.orderStatus);
 
+            // 配送方式：空 / 自取 / 送货 / 安装
+            let deliveryType = '';
+            if (source.deliveryType === '自取' || source.deliveryType === '送货' || source.deliveryType === '安装') {
+                deliveryType = source.deliveryType;
+            }
+
             const logs = Array.isArray(source.logs)
                 ? source.logs.map(normalizeLogEntry).filter(Boolean)
                 : [];
@@ -1722,13 +1812,13 @@
                 expectedDate: typeof source.expectedDate === 'string' ? source.expectedDate : '',
                 description: typeof source.description === 'string' ? source.description.trim() : '',
                 projectFlag: normalizeProjectFlag(source.projectFlag),
+                deliveryType,
                 currentStage,
                 progress: getStageProgress(currentStage),
                 totalAmount: Number.isFinite(totalAmount) ? totalAmount : null,
                 stageDates,
                 progressPayments,
                 orderItems,
-                orderStatus,
                 logs,
                 version,
                 updatedAt
@@ -2232,6 +2322,7 @@
                 });
             }
 
+            document.getElementById('deliveryType').value = project.deliveryType || '';
             resetOrderRows(project.orderItems || []);
 
             updateTotalSummary();
@@ -2269,6 +2360,7 @@
             }
 
             const orderItems = collectOrderItemsFromForm();
+            const deliveryType = document.getElementById('deliveryType').value;
 
             const currentStage = parseInt(document.getElementById('currentStage').value, 10);
             const projectFlag = normalizeProjectFlag(document.getElementById('projectFlag').value);
@@ -2278,6 +2370,7 @@
                 name: document.getElementById('projectName').value.trim(),
                 createDate: document.getElementById('createDate').value || new Date().toISOString().split('T')[0],
                 expectedDate: document.getElementById('expectedDate').value,
+                deliveryType: deliveryType,
                 currentStage: currentStage,
                 projectFlag,
                 progress: stages[currentStage].progress,
@@ -2413,13 +2506,14 @@
                             </div>
                             <div class="list-meta">
                                 当前阶段：${stageInfo.name} | 进度：${stageInfo.progress}% 
+                                ${project.deliveryType ? renderDeliveryTypeBadge(project.deliveryType) : ''}
                                 ${project.expectedDate ? `| 预期完成：${project.expectedDate}` : ''}
                                 ${paymentHtml}
                             </div>
                         </div>
                         <div class="list-actions">
                             ${project.currentStage > 0 ? `<button class="btn-success" onclick="prevStage(${project.id})">上一阶段</button>` : ''}
-                            ${project.currentStage < 6 ? `<button class="btn-success" onclick="nextStage(${project.id})">下一阶段</button>` : ''}
+                            ${project.currentStage < 7 ? `<button class="btn-success" onclick="nextStage(${project.id})">下一阶段</button>` : ''}
                             <button class="btn-primary" onclick="openLogModal(${project.id})">日志</button>
                             <button class="btn-primary" onclick="openEditModal(${project.id})">编辑</button>
                             <button class="btn-danger" onclick="deleteProject(${project.id})">删除</button>
@@ -2510,20 +2604,20 @@
 
                         card.innerHTML = `
                             <div class="card-title-row">
-                                <div class="card-title">${escapeHtml(project.name)}</div>
+                                <div class="card-title">${escapeHtml(project.name)}${project.deliveryType ? renderDeliveryTypeBadge(project.deliveryType) : ''}</div>
                             </div>
                             <div class="card-info">
                                 <span>阶段：${stage.name}</span>
                                 ${currentDate ? `<span class="card-stage-date">${currentDate}</span>` : ''}
                             </div>
-                            ${(badge || flagBadge) ? `<div class="card-badge-row">${badge}${flagBadge}</div>` : ''}
+                            ${(badge || flagBadge || project.deliveryType) ? `<div class="card-badge-row">${badge}${flagBadge}</div>` : ''}
                             <div class="progress-bar">
                                 <div class="progress-fill" style="width: ${stage.progress}%"></div>
                             </div>
                             ${paymentInfo}
                             <div class="card-actions">
                                 ${project.currentStage > 0 ? `<button class="btn-success" onclick="prevStage(${project.id})">上一阶段</button>` : ''}
-                                ${project.currentStage < 6 ? `<button class="btn-success" onclick="nextStage(${project.id})">下一阶段</button>` : ''}
+                                ${project.currentStage < 7 ? `<button class="btn-success" onclick="nextStage(${project.id})">下一阶段</button>` : ''}
                                 <button class="btn-primary" onclick="openLogModal(${project.id})">日志</button>
                                 <button class="btn-primary" onclick="openEditModal(${project.id})">编辑</button>
                                 <button class="btn-danger" onclick="deleteProject(${project.id})">删除</button>
@@ -2814,18 +2908,71 @@
                 });
             }
 
-            const filteredProjects = projectsWithMonthKey
+            // 获取筛选条件
+            const dateStart = document.getElementById('deliveredDateStart').value;
+            const dateEnd = document.getElementById('deliveredDateEnd').value;
+            const paymentFilter = document.getElementById('deliveredPaymentFilter').value;
+            const sortBy = document.getElementById('deliveredSortBy').value;
+
+            // 第一步：按月筛选
+            let filtered = projectsWithMonthKey
                 .filter(({ monthKey }) => {
                     if (selectedMonth === 'all') return true;
                     if (selectedMonth === 'unknown') return !monthKey;
                     return monthKey === selectedMonth;
                 })
-                .map(({ project }) => project);
+                .map(({ project, totalAmount, paidAmount }) => ({
+                    project,
+                    totalAmount,
+                    paidAmount,
+                    unpaidAmount: totalAmount - paidAmount
+                }));
 
+            // 第二步：日期范围筛选
+            filtered = filtered.filter(({ project }) => {
+                const deliveredDate = resolveDeliveredDate(project);
+                if (!deliveredDate) return true; // 没有日期不筛选
+                if (dateStart && deliveredDate < dateStart) return false;
+                if (dateEnd && deliveredDate > dateEnd) return false;
+                return true;
+            });
+
+            // 第三步：付款状态筛选
+            filtered = filtered.filter(({ unpaidAmount, totalAmount }) => {
+                if (paymentFilter === 'all') return true;
+                if (paymentFilter === 'paid') return totalAmount <= 0 || unpaidAmount <= 0;
+                if (paymentFilter === 'unpaid') return unpaidAmount > 0;
+                return true;
+            });
+
+            // 提取项目数组
+            let filteredProjects = filtered.map(item => item.project);
+
+            // 排序
             const sorted = filteredProjects.slice().sort((a, b) => {
-                const dateA = resolveDeliveredDate(a);
-                const dateB = resolveDeliveredDate(b);
-                return dateB.localeCompare(dateA);
+                const paidTotalA = calculatePaidTotal(a);
+                const totalA = Number.isFinite(a.totalAmount) ? a.totalAmount : 0;
+                const unpaidA = totalA - paidTotalA;
+
+                const paidTotalB = calculatePaidTotal(b);
+                const totalB = Number.isFinite(b.totalAmount) ? b.totalAmount : 0;
+                const unpaidB = totalB - paidTotalB;
+
+                const dateA = resolveDeliveredDate(a) || '';
+                const dateB = resolveDeliveredDate(b) || '';
+
+                switch (sortBy) {
+                    case 'deliveredDate-asc':
+                        return dateA.localeCompare(dateB);
+                    case 'deliveredDate-desc':
+                        return dateB.localeCompare(dateA);
+                    case 'totalAmount-desc':
+                        return totalB - totalA;
+                    case 'unpaid-desc':
+                        return unpaidB - unpaidA;
+                    default:
+                        return dateB.localeCompare(dateA);
+                }
             });
 
             if (sorted.length === 0) {
@@ -2843,7 +2990,7 @@
                 return `
                     <div class="${cardClass}">
                         <div class="list-title-row">
-                            <div class="list-name">${escapeHtml(project.name)}</div>
+                            <div class="list-name">${escapeHtml(project.name)}${project.deliveryType ? renderDeliveryTypeBadge(project.deliveryType) : ''}</div>
                             <div class="card-actions">
                                 <button class="btn-primary" onclick="openLogModal(${project.id})">日志</button>
                                 <button class="btn-primary" onclick="openEditModal(${project.id})">编辑</button>
@@ -2854,6 +3001,7 @@
                             <span>阶段：${stageInfo.name || 'Delivered'}</span>
                             ${deliveredDate ? `<span>交付日期：${deliveredDate}</span>` : ''}
                             ${project.expectedDate ? `<span>预期：${project.expectedDate}</span>` : ''}
+                            ${project.deliveryType ? `<span>${renderDeliveryTypeBadge(project.deliveryType)}</span>` : ''}
                             ${total > 0 ? `<span>总额：${formatMoney(total)}</span>` : ''}
                             ${unpaid > 0 ? `<span style="color: #ff4d4f; font-weight: 500;">未收：${formatMoney(unpaid)}</span>` : ''}
                         </div>
