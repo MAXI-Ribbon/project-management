@@ -2529,7 +2529,7 @@
             const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
             const flagFilter = document.getElementById('flagFilter').value;
             const filtered = projects.filter(project => projectMatchesFilters(project, searchText, flagFilter));
-            const boardProjects = filtered.filter(project => project.currentStage !== 6);
+            const boardProjects = filtered.filter(project => project.currentStage !== 7);
 
             const grouped = {};
             kanbanStages.forEach(stage => {
