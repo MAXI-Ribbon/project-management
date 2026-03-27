@@ -805,6 +805,13 @@
         .order-items-table th {
             background: #fafafa;
         }
+        .order-item-status-select {
+            min-width: 90px;
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
         .order-items-table td input {
             width: 100%;
             padding: 6px 8px;
@@ -839,6 +846,10 @@
             padding: 14px;
             margin-bottom: 14px;
             background: #fff;
+        }
+        .delivered-project-card.unpaid {
+            border-color: #ff4d4f;
+            background: #fff2f0;
         }
         .delivered-project-card .list-title-row {
             margin-bottom: 6px;
@@ -1017,8 +1028,8 @@
                 <div class="list-title-row" style="margin-bottom: 12px; justify-content: space-between;">
                     <div class="list-name">订购清单</div>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <label for="orderStatusFilter" style="margin: 0; white-space: nowrap;">状态筛选：</label>
-                        <select id="orderStatusFilter">
+                        <label for="orderItemStatusFilter" style="margin: 0; white-space: nowrap;">状态筛选：</label>
+                        <select id="orderItemStatusFilter">
                             <option value="all">全部</option>
                             <option value="未定">未定</option>
                             <option value="已定">已定</option>
@@ -1099,21 +1110,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="orderStatus">订购状态</label>
-                        <select id="orderStatus">
-                            <option value="未定">未定</option>
-                            <option value="已定">已定</option>
-                            <option value="已付款">已付款</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
                         <label>订购清单</label>
                         <table class="order-items-table">
                             <thead>
                                 <tr>
                                     <th>名称</th>
                                     <th>数量</th>
+                                    <th>状态</th>
                                     <th style="width: 90px;">操作</th>
                                 </tr>
                             </thead>
@@ -1192,7 +1195,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.0.1-r8';
+        const APP_VERSION = '1.0.1-r9';
         const BASE_RELEASE_VERSION = '1.0.1';
 
         // 7个生产阶段定义
@@ -1317,7 +1320,7 @@
             document.getElementById('clearBtn').addEventListener('click', clearAll);
             document.getElementById('searchInput').addEventListener('input', renderCurrentPage);
             document.getElementById('flagFilter').addEventListener('change', renderCurrentPage);
-            document.getElementById('orderStatusFilter').addEventListener('change', renderOrderPage);
+            document.getElementById('orderItemStatusFilter').addEventListener('change', renderOrderPage);
             document.getElementById('addOrderRowBtn').addEventListener('click', () => addOrderRow());
             document.getElementById('prevCalendar').addEventListener('click', prevCalendar);
             document.getElementById('nextCalendar').addEventListener('click', nextCalendar);
@@ -1599,7 +1602,8 @@
                 } else if (typeof rawQuantity === 'string') {
                     quantity = rawQuantity.trim();
                 }
-                return { name, quantity };
+                let status = normalizeOrderStatus(item?.status);
+                return { name, quantity, status };
             }).filter(item => item.name || item.quantity);
         }
 
@@ -2117,10 +2121,17 @@
         function addOrderRow(item = {}) {
             const container = document.getElementById('orderItemsContainer');
             if (!container) return;
+            const itemStatus = normalizeOrderStatus(item?.status);
+            const statusOptions = ORDER_STATUSES.map(status => `<option value="${status}"${itemStatus === status ? ' selected' : ''}>${status}</option>`).join('');
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><input type="text" class="order-item-name" value="${escapeHtml(item.name || '')}" placeholder="请输入名称"></td>
                 <td><input type="text" class="order-item-quantity" value="${escapeHtml(item.quantity || '')}" placeholder="请输入数量"></td>
+                <td>
+                    <select class="order-item-status-select">
+                        ${statusOptions}
+                    </select>
+                </td>
                 <td><button type="button" class="btn-danger order-remove-btn">删除</button></td>
             `;
             const removeBtn = row.querySelector('.order-remove-btn');
@@ -2138,7 +2149,7 @@
                 addOrderRow();
                 return;
             }
-            items.forEach(item => addOrderRow({ name: item.name, quantity: item.quantity }));
+            items.forEach(item => addOrderRow(item));
         }
 
         function collectOrderItemsFromForm() {
@@ -2147,9 +2158,11 @@
             return Array.from(container.querySelectorAll('tr')).map(row => {
                 const nameInput = row.querySelector('.order-item-name');
                 const qtyInput = row.querySelector('.order-item-quantity');
+                const statusSelect = row.querySelector('.order-item-status-select');
                 return {
                     name: nameInput ? nameInput.value.trim() : '',
-                    quantity: qtyInput ? qtyInput.value.trim() : ''
+                    quantity: qtyInput ? qtyInput.value.trim() : '',
+                    status: statusSelect ? normalizeOrderStatus(statusSelect.value) : '未定'
                 };
             }).filter(item => item.name || item.quantity);
         }
@@ -2176,7 +2189,6 @@
                 document.getElementById(`paymentPaid_${i}`).checked = false;
             }
 
-            document.getElementById('orderStatus').value = '未定';
             resetOrderRows();
 
             document.getElementById('currentStage').value = '0';
@@ -2222,7 +2234,6 @@
                 });
             }
 
-            document.getElementById('orderStatus').value = project.orderStatus || '未定';
             resetOrderRows(project.orderItems || []);
 
             updateTotalSummary();
@@ -2260,7 +2271,6 @@
             }
 
             const orderItems = collectOrderItemsFromForm();
-            const orderStatusValue = normalizeOrderStatus(document.getElementById('orderStatus').value);
 
             const currentStage = parseInt(document.getElementById('currentStage').value, 10);
             const projectFlag = normalizeProjectFlag(document.getElementById('projectFlag').value);
@@ -2278,7 +2288,6 @@
                 stageDates: stageDates,
                 progressPayments: progressPayments,
                 orderItems: orderItems,
-                orderStatus: orderStatusValue,
                 logs: existingProject ? (existingProject.logs || []) : [],
                 version: existingProject ? (Math.max(Number(existingProject.version) || 1, 1) + 1) : 1,
                 updatedAt: nowTimestamp
@@ -2552,10 +2561,21 @@
 
         function renderOrderPage() {
             const projects = getProjects();
-            const filter = document.getElementById('orderStatusFilter').value;
+            const filter = document.getElementById('orderItemStatusFilter').value;
             const projectsWithData = projects.filter(projectHasOrderData);
-            const filtered = projectsWithData.filter(project => filter === 'all' || project.orderStatus === filter);
-            filtered.sort((a, b) => {
+            // 对每个项目，筛选出符合状态的订单项，如果筛选后没有订单项则隐藏整个项目
+            const filteredProjectsWithItems = projectsWithData.map(project => {
+                const items = Array.isArray(project.orderItems) ? project.orderItems : [];
+                const filteredItems = filter === 'all'
+                    ? items
+                    : items.filter(item => normalizeOrderStatus(item?.status) === filter);
+                return {
+                    ...project,
+                    filteredOrderItems: filteredItems
+                };
+            }).filter(project => project.filteredOrderItems.length > 0);
+
+            filteredProjectsWithItems.sort((a, b) => {
                 if (a.currentStage !== b.currentStage) return a.currentStage - b.currentStage;
                 if ((a.expectedDate || '') !== (b.expectedDate || '')) return (a.expectedDate || '').localeCompare(b.expectedDate || '');
                 return (a.name || '').localeCompare(b.name || '');
@@ -2563,23 +2583,31 @@
 
             const container = document.getElementById('orderProjectsContainer');
             if (!container) return;
-            if (filtered.length === 0) {
+            if (filteredProjectsWithItems.length === 0) {
                 container.innerHTML = '<div class="empty-column">暂无符合筛选条件的订购信息</div>';
                 return;
             }
 
-            container.innerHTML = filtered.map(project => {
+            container.innerHTML = filteredProjectsWithItems.map(project => {
                 const stageInfo = stages[project.currentStage] || {};
-                const items = Array.isArray(project.orderItems) ? project.orderItems : [];
+                const items = project.filteredOrderItems;
                 const rows = items.length
-                    ? items.map(item => `
-                        <tr>
-                            <td>${escapeHtml(item.name)}</td>
-                            <td>${escapeHtml(item.quantity || '-')}</td>
-                        </tr>
-                    `).join('')
-                    : '<tr class="order-empty-row"><td colspan="2">暂无订购项，点击编辑填写</td></tr>';
-                const statusOptions = ORDER_STATUSES.map(status => `<option value="${status}"${project.orderStatus === status ? ' selected' : ''}>${status}</option>`).join('');
+                    ? items.map(item => {
+                        const itemStatus = normalizeOrderStatus(item?.status);
+                        const statusOptions = ORDER_STATUSES.map(status => `<option value="${status}"${itemStatus === status ? ' selected' : ''}>${status}</option>`).join('');
+                        return `
+                            <tr>
+                                <td>${escapeHtml(item.name)}</td>
+                                <td>${escapeHtml(item.quantity || '-')}</td>
+                                <td>
+                                    <select class="order-item-status-select" onchange="updateOrderItemStatus(${project.id}, this.parentElement.parentElement.rowIndex - 1, this.value)">
+                                        ${statusOptions}
+                                    </select>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')
+                    : '<tr class="order-empty-row"><td colspan="3">暂无订购项，点击编辑填写</td></tr>';
                 return `
                     <div class="order-project-group">
                         <div class="list-title-row">
@@ -2597,39 +2625,29 @@
                                 <tr>
                                     <th>名称</th>
                                     <th>数量</th>
+                                    <th>状态</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${rows}
                             </tbody>
                         </table>
-                        <div class="order-status-row">
-                            <label>订单状态：</label>
-                            <select class="order-status-select" onchange="updateProjectOrderStatus(${project.id}, this.value)">
-                                ${statusOptions}
-                            </select>
-                        </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function updateProjectOrderStatus(projectId, status) {
+        function updateOrderItemStatus(projectId, itemIndex, status) {
             const projects = getProjects();
             const index = projects.findIndex(p => String(p.id) === String(projectId));
             if (index === -1) return;
             const normalized = normalizeOrderStatus(status);
-            projects[index].orderStatus = normalized;
+            if (projects[index].orderItems && projects[index].orderItems[itemIndex]) {
+                projects[index].orderItems[itemIndex].status = normalized;
+            }
             projects[index].updatedAt = getCurrentTimestamp();
             projects[index].version = Math.max(Number(projects[index].version) || 1, 1) + 1;
             saveProjects(projects);
-            const page = document.getElementById('pageSelector').value;
-            if (page === 'order') {
-                renderOrderPage();
-            }
-            if (page === 'delivered') {
-                renderDeliveredPage();
-            }
             updateStats();
         }
 
@@ -2645,23 +2663,37 @@
                 return;
             }
 
+            // 计算每个项目已收款总额
+            function calculatePaidTotal(project) {
+                if (!project.progressPayments || !Array.isArray(project.progressPayments)) return 0;
+                return project.progressPayments.reduce((sum, payment) => {
+                    if (payment && payment.paid && Number.isFinite(payment.amount)) {
+                        return sum + payment.amount;
+                    }
+                    return sum;
+                }, 0);
+            }
+
             const projectsWithMonthKey = projects.map(project => ({
                 project,
-                monthKey: getYearMonthKey(resolveDeliveredMonthSource(project))
+                monthKey: getYearMonthKey(resolveDeliveredMonthSource(project)),
+                totalAmount: Number.isFinite(project.totalAmount) ? project.totalAmount : 0,
+                paidAmount: calculatePaidTotal(project)
             }));
 
             const summaryByMonth = {};
-            const unknownBucket = { amount: 0, count: 0 };
-            projectsWithMonthKey.forEach(({ project, monthKey }) => {
-                const amountValue = Number.isFinite(project.totalAmount) ? project.totalAmount : 0;
+            const unknownBucket = { amount: 0, count: 0, paid: 0 };
+            projectsWithMonthKey.forEach(({ project, monthKey, totalAmount, paidAmount }) => {
                 if (monthKey) {
                     if (!summaryByMonth[monthKey]) {
-                        summaryByMonth[monthKey] = { amount: 0, count: 0 };
+                        summaryByMonth[monthKey] = { amount: 0, count: 0, paid: 0 };
                     }
-                    summaryByMonth[monthKey].amount += amountValue;
+                    summaryByMonth[monthKey].amount += totalAmount;
+                    summaryByMonth[monthKey].paid += paidAmount;
                     summaryByMonth[monthKey].count += 1;
                 } else {
-                    unknownBucket.amount += amountValue;
+                    unknownBucket.amount += totalAmount;
+                    unknownBucket.paid += paidAmount;
                     unknownBucket.count += 1;
                 }
             });
@@ -2671,6 +2703,7 @@
                 value: key,
                 label: formatYearMonthLabel(key),
                 amount: summaryByMonth[key].amount,
+                paid: summaryByMonth[key].paid,
                 count: summaryByMonth[key].count
             }));
             if (unknownBucket.count > 0) {
@@ -2678,13 +2711,15 @@
                     value: 'unknown',
                     label: '未知月份',
                     amount: unknownBucket.amount,
+                    paid: unknownBucket.paid,
                     count: unknownBucket.count
                 });
             }
 
             const totalAmount = summaryCards.reduce((sum, card) => sum + card.amount, 0);
+            const totalPaid = summaryCards.reduce((sum, card) => sum + (card.paid || 0), 0);
             const totalCount = summaryCards.reduce((sum, card) => sum + card.count, 0);
-            const aggregatedCard = { value: 'all', label: '全部月份', amount: totalAmount, count: totalCount };
+            const aggregatedCard = { value: 'all', label: '全部月份', amount: totalAmount, paid: totalPaid, count: totalCount };
 
             const monthOptions = [
                 { value: 'all', label: '全部月份' },
@@ -2704,23 +2739,28 @@
 
             let selectedStats = {
                 amount: totalAmount,
+                paid: totalPaid,
                 count: totalCount,
                 label: '全部月份'
             };
             if (selectedMonth === 'unknown') {
                 selectedStats = {
                     amount: unknownBucket.amount,
+                    paid: unknownBucket.paid,
                     count: unknownBucket.count,
                     label: '未知月份'
                 };
             } else if (selectedMonth !== 'all') {
-                const matched = summaryByMonth[selectedMonth] || { amount: 0, count: 0 };
+                const matched = summaryByMonth[selectedMonth] || { amount: 0, paid: 0, count: 0 };
                 selectedStats = {
                     amount: matched.amount,
+                    paid: matched.paid,
                     count: matched.count,
                     label: formatYearMonthLabel(selectedMonth)
                 };
             }
+
+            const unpaidAmount = selectedStats.amount - (selectedStats.paid || 0);
 
             deliveredSelectedMonth = selectedMonth;
 
@@ -2735,18 +2775,35 @@
                     </div>
                     <div class="delivered-summary-selected">
                         <div class="delivered-summary-label">${escapeHtml(selectedStats.label)}</div>
-                        <div class="delivered-summary-amount">${formatMoney(selectedStats.amount)}</div>
+                        <div style="display:flex; gap: 20px; flex-wrap: wrap;">
+                            <div>
+                                <div class="delivered-summary-amount">${formatMoney(selectedStats.amount)}</div>
+                                <div class="delivered-summary-count">总金额</div>
+                            </div>
+                            <div>
+                                <div class="delivered-summary-amount">${formatMoney(selectedStats.paid || 0)}</div>
+                                <div class="delivered-summary-count">已收款</div>
+                            </div>
+                            <div style="${unpaidAmount > 0 ? 'color: #ff4d4f;' : ''}">
+                                <div class="delivered-summary-amount">${formatMoney(unpaidAmount)}</div>
+                                <div class="delivered-summary-count">未收款</div>
+                            </div>
+                        </div>
                         <div class="delivered-summary-count">项目数：${selectedStats.count}</div>
                     </div>
                 </div>
                 <div class="delivered-summary-grid">
-                    ${cardsForGrid.map(card => `
+                    ${cardsForGrid.map(card => {
+                        const cardUnpaid = (card.amount || 0) - (card.paid || 0);
+                        return `
                         <div class="delivered-summary-card${card.value === selectedMonth ? ' selected' : ''}">
                             <div class="delivered-summary-card-title">${escapeHtml(card.label)}</div>
                             <div class="delivered-summary-card-amount">${formatMoney(card.amount)}</div>
+                            ${cardUnpaid > 0 ? `<div style="color: #ff4d4f; font-size: 12px; margin-top: 2px;">未收：${formatMoney(cardUnpaid)}</div>` : ''}
                             <div class="delivered-summary-card-count">项目数：${card.count}</div>
                         </div>
-                    `).join('')}
+                    `;
+                    }).join('')}
                 </div>
             `;
 
@@ -2781,9 +2838,12 @@
             container.innerHTML = sorted.map(project => {
                 const stageInfo = stages[project.currentStage] || {};
                 const deliveredDate = resolveDeliveredDate(project);
-                const statusOptions = ORDER_STATUSES.map(status => `<option value="${status}"${project.orderStatus === status ? ' selected' : ''}>${status}</option>`).join('');
+                const paidTotal = calculatePaidTotal(project);
+                const total = Number.isFinite(project.totalAmount) ? project.totalAmount : 0;
+                const unpaid = total - paidTotal;
+                const cardClass = unpaid > 0 ? 'delivered-project-card unpaid' : 'delivered-project-card';
                 return `
-                    <div class="delivered-project-card">
+                    <div class="${cardClass}">
                         <div class="list-title-row">
                             <div class="list-name">${escapeHtml(project.name)}</div>
                             <div class="card-actions">
@@ -2796,12 +2856,8 @@
                             <span>阶段：${stageInfo.name || 'Delivered'}</span>
                             ${deliveredDate ? `<span>交付日期：${deliveredDate}</span>` : ''}
                             ${project.expectedDate ? `<span>预期：${project.expectedDate}</span>` : ''}
-                        </div>
-                        <div class="order-status-row">
-                            <label>订单状态：</label>
-                            <select class="order-status-select" onchange="updateProjectOrderStatus(${project.id}, this.value)">
-                                ${statusOptions}
-                            </select>
+                            ${total > 0 ? `<span>总额：${formatMoney(total)}</span>` : ''}
+                            ${unpaid > 0 ? `<span style="color: #ff4d4f; font-weight: 500;">未收：${formatMoney(unpaid)}</span>` : ''}
                         </div>
                     </div>
                 `;
