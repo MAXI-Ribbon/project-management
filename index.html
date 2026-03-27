@@ -457,6 +457,21 @@
             border-left: 3px solid rgba(0, 0, 0, 0.08);
         }
 
+        .calendar-event.project[draggable="true"] {
+            cursor: grab;
+        }
+
+        .calendar-event.project.calendar-dragging {
+            opacity: 0.55;
+            cursor: grabbing;
+        }
+
+        .calendar-day.calendar-drop-target {
+            outline: 2px dashed #1677ff;
+            outline-offset: -3px;
+            background: rgba(22, 119, 255, 0.06);
+        }
+
         .calendar-event.project.calendar-event-stage-default {
             background: #f0f0f0;
             color: #595959;
@@ -548,6 +563,10 @@
             overflow-y: auto;
         }
 
+        .modal.project-modal {
+            max-width: 980px;
+        }
+
         .modal-header {
             padding: 15px 20px;
             border-bottom: 1px solid #eee;
@@ -579,6 +598,20 @@
 
         .form-group {
             margin-bottom: 15px;
+        }
+
+        .project-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 16px;
+        }
+
+        .project-form-grid .form-group {
+            margin-bottom: 14px;
+        }
+
+        .project-form-grid .form-group.full-width {
+            grid-column: 1 / -1;
         }
 
         label {
@@ -812,6 +845,12 @@
                 display: block;
                 text-align: center;
                 margin-top: 2px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .project-form-grid {
+                grid-template-columns: 1fr;
             }
         }
         .order-page .order-project-group {
@@ -1114,7 +1153,7 @@
 
     <!-- 添加/编辑项目弹窗 -->
     <div class="modal-overlay" id="modal">
-        <div class="modal">
+        <div class="modal project-modal">
             <div class="modal-header">
                 <h2 id="modalTitle">添加新项目</h2>
                 <button class="close-btn" id="closeModal">&times;</button>
@@ -1122,96 +1161,98 @@
             <div class="modal-body">
                 <form id="projectForm">
                     <input type="hidden" id="editId">
-                    <div class="form-group">
-                        <label for="projectName">项目名称/地址 *</label>
-                        <input type="text" id="projectName" required placeholder="请输入项目名称或地址">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="createDate">创建日期</label>
-                        <input type="date" id="createDate">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="expectedDate">预期完成日期</label>
-                        <input type="date" id="expectedDate">
-                    </div>
-
-                    <div class="form-group">
-                        <label>各阶段计划日期</label>
-                        <div class="stage-dates" id="stageDatesContainer">
-                            <!-- 动态生成 -->
+                    <div class="project-form-grid">
+                        <div class="form-group full-width">
+                            <label for="projectName">项目名称/地址 *</label>
+                            <input type="text" id="projectName" required placeholder="请输入项目名称或地址">
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="totalAmount">项目总金额 ($)</label>
-                        <input type="number" id="totalAmount" step="0.01" placeholder="输入项目总金额">
-                    </div>
-
-                    <div class="form-group">
-                        <label>进度款（最多5笔）</label>
-                        <div id="progressPaymentsContainer">
-                            <!-- 5个进度款输入框 -->
+                        <div class="form-group">
+                            <label for="createDate">创建日期</label>
+                            <input type="date" id="createDate">
                         </div>
-                        <div style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>已付总额：</span>
-                                <strong id="paidTotal">$0.00</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span>未付总额：</span>
-                                <strong id="unpaidTotal" style="color: #cf1322;">$0.00</strong>
-                            </div>
+
+                        <div class="form-group">
+                            <label for="expectedDate">预期完成日期</label>
+                            <input type="date" id="expectedDate">
                         </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="deliveryType">配送方式</label>
-                        <select id="deliveryType">
-                            <option value="">无</option>
-                            <option value="自取">自取</option>
-                            <option value="送货">送货</option>
-                            <option value="安装">安装</option>
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label for="currentStage">当前所处阶段</label>
+                            <select id="currentStage"></select>
+                        </div>
 
-                    <div class="form-group">
-                        <label>订购清单</label>
-                        <table class="order-items-table">
-                            <thead>
-                                <tr>
-                                    <th>名称</th>
-                                    <th>数量</th>
-                                    <th>状态</th>
-                                    <th style="width: 90px;">操作</th>
-                                </tr>
-                            </thead>
-                            <tbody id="orderItemsContainer">
+                        <div class="form-group">
+                            <label for="projectFlag">项目状态标签</label>
+                            <select id="projectFlag">
+                                <option value="">正常</option>
+                                <option value="follow_up">跟进</option>
+                                <option value="on_hold">On Hold</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>各阶段计划日期</label>
+                            <div class="stage-dates" id="stageDatesContainer">
                                 <!-- 动态生成 -->
-                            </tbody>
-                        </table>
-                        <button type="button" class="btn-primary" id="addOrderRowBtn">+ 添加行</button>
-                        <div class="list-meta" style="margin-top: 6px;">至少填写名称与数量，保存后会同步到订购页面。</div>
-                    </div>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="currentStage">当前所处阶段</label>
-                        <select id="currentStage"></select>
-                    </div>
+                        <div class="form-group">
+                            <label for="totalAmount">项目总金额 ($)</label>
+                            <input type="number" id="totalAmount" step="0.01" placeholder="输入项目总金额">
+                        </div>
 
-                    <div class="form-group">
-                        <label for="projectFlag">项目状态标签</label>
-                        <select id="projectFlag">
-                            <option value="">正常</option>
-                            <option value="follow_up">跟进</option>
-                            <option value="on_hold">On Hold</option>
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label for="deliveryType">配送方式</label>
+                            <select id="deliveryType">
+                                <option value="">无</option>
+                                <option value="自取">自取</option>
+                                <option value="送货">送货</option>
+                                <option value="安装">安装</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="description">备注 / 联系人信息</label>
-                        <textarea id="description" placeholder="输入联系人电话、备注信息等"></textarea>
+                        <div class="form-group full-width">
+                            <label>进度款（最多5笔）</label>
+                            <div id="progressPaymentsContainer">
+                                <!-- 5个进度款输入框 -->
+                            </div>
+                            <div style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>已付总额：</span>
+                                    <strong id="paidTotal">$0.00</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>未付总额：</span>
+                                    <strong id="unpaidTotal" style="color: #cf1322;">$0.00</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>订购清单</label>
+                            <table class="order-items-table">
+                                <thead>
+                                    <tr>
+                                        <th>名称</th>
+                                        <th>数量</th>
+                                        <th>状态</th>
+                                        <th style="width: 90px;">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orderItemsContainer">
+                                    <!-- 动态生成 -->
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn-primary" id="addOrderRowBtn">+ 添加行</button>
+                            <div class="list-meta" style="margin-top: 6px;">至少填写名称与数量，保存后会同步到订购页面。</div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="description">备注 / 联系人信息</label>
+                            <textarea id="description" placeholder="输入联系人电话、备注信息等"></textarea>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -1293,6 +1334,8 @@
         };
 
         let draggedProject = null;
+        let draggedCalendarEvent = null;
+        let suppressCalendarEventClick = false;
         let currentCalendar = { year: null, month: null };
         let currentWeek = { year: null, week: null }; // ISO 周日
         let currentDay = { year: null, month: null, day: null };
@@ -3044,6 +3087,86 @@
             return events;
         }
 
+        function enableCalendarProjectEventDrag(eventEl, eventData) {
+            if (!eventEl || !eventData) return;
+            eventEl.draggable = true;
+            eventEl.addEventListener('dragstart', (e) => {
+                draggedCalendarEvent = { ...eventData };
+                suppressCalendarEventClick = true;
+                eventEl.classList.add('calendar-dragging');
+                if (e.dataTransfer) {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', `${eventData.projectId}|${eventData.stageId}`);
+                }
+            });
+            eventEl.addEventListener('dragend', () => {
+                draggedCalendarEvent = null;
+                eventEl.classList.remove('calendar-dragging');
+                setTimeout(() => {
+                    suppressCalendarEventClick = false;
+                }, 0);
+            });
+            eventEl.addEventListener('click', () => {
+                if (suppressCalendarEventClick) return;
+                openEditModal(eventData.projectId);
+            });
+        }
+
+        function enableCalendarDropTarget(dayEl, targetDateStr) {
+            if (!dayEl || !targetDateStr) return;
+            dayEl.addEventListener('dragover', (e) => {
+                if (!draggedCalendarEvent) return;
+                e.preventDefault();
+                if (e.dataTransfer) {
+                    e.dataTransfer.dropEffect = 'move';
+                }
+                dayEl.classList.add('calendar-drop-target');
+            });
+            dayEl.addEventListener('dragleave', () => {
+                dayEl.classList.remove('calendar-drop-target');
+            });
+            dayEl.addEventListener('drop', (e) => {
+                if (!draggedCalendarEvent) return;
+                e.preventDefault();
+                dayEl.classList.remove('calendar-drop-target');
+                applyCalendarDraggedDate(targetDateStr);
+            });
+        }
+
+        function applyCalendarDraggedDate(targetDateStr) {
+            if (!draggedCalendarEvent || !targetDateStr) return;
+            const { projectId, stageId } = draggedCalendarEvent;
+            const projects = getProjects();
+            const project = projects.find(p => String(p.id) === String(projectId));
+            if (!project) return;
+
+            const stageLabel = stageId === 'expected' ? '预期完成日期' : (getStageById(stageId)?.name || '阶段日期');
+            let oldDate = '';
+
+            if (stageId === 'expected') {
+                oldDate = project.expectedDate || '';
+                if (oldDate === targetDateStr) return;
+                project.expectedDate = targetDateStr;
+            } else {
+                if (!project.stageDates || typeof project.stageDates !== 'object') {
+                    project.stageDates = {};
+                }
+                oldDate = project.stageDates[stageId] || '';
+                if (oldDate === targetDateStr) return;
+                project.stageDates[stageId] = targetDateStr;
+            }
+
+            if (!project.logs) project.logs = [];
+            project.logs.unshift(createLogEntry('日历拖拽改期', `${stageLabel}: ${oldDate || '未设置'} → ${targetDateStr}`));
+            project.updatedAt = getCurrentTimestamp();
+            project.version = Math.max(Number(project.version) || 1, 1) + 1;
+
+            saveProjects(projects);
+            renderCurrentPage();
+            updateStats();
+            renderCalendar();
+        }
+
         // === 获取ISO周日序号 => 第几周
         function getWeekNumber(date) {
             const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -3185,6 +3308,7 @@
                 const div = document.createElement('div');
                 div.className = classes;
                 div.innerHTML = `<div class="day-number">${day}<button class="add-temp-btn" onclick="openAddTempWork('${dateStr}')">+</button></div>`;
+                enableCalendarDropTarget(div, dateStr);
 
                 // 获取当天项目阶段事件
                 const dayEvents = allEvents.filter(ev => ev.date === dateStr);
@@ -3193,7 +3317,7 @@
                     const stageClass = getStageEventClass(ev.stageId);
                     divEv.className = `calendar-event project ${stageClass}`;
                     divEv.textContent = `${ev.projectName} (${ev.stageName})`;
-                    divEv.onclick = () => openEditModal(ev.projectId);
+                    enableCalendarProjectEventDrag(divEv, ev);
                     div.appendChild(divEv);
                 });
 
@@ -3259,6 +3383,7 @@
                 div.className = classes;
                 div.style.minHeight = '150px';
                 div.innerHTML = `<div class="day-number">${date.getDate()} (${date.getMonth() + 1}月)<button class="add-temp-btn" onclick="openAddTempWork('${dateStr}')">+</button></div>`;
+                enableCalendarDropTarget(div, dateStr);
 
                 const dayEvents = allEvents.filter(ev => ev.date === dateStr);
                 dayEvents.forEach(ev => {
@@ -3266,7 +3391,7 @@
                     const stageClass = getStageEventClass(ev.stageId);
                     divEv.className = `calendar-event project ${stageClass}`;
                     divEv.textContent = `${ev.projectName} (${ev.stageName})`;
-                    divEv.onclick = () => openEditModal(ev.projectId);
+                    enableCalendarProjectEventDrag(divEv, ev);
                     div.appendChild(divEv);
                 });
 
@@ -3310,6 +3435,7 @@
             div.className = classes;
             div.style.minHeight = '400px';
             div.innerHTML = `<div class="day-number" style="margin-bottom: 15px;">${dateStr} <button class="add-temp-btn" onclick="openAddTempWork('${dateStr}')">+</button></div>`;
+            enableCalendarDropTarget(div, dateStr);
 
             // 项目阶段事件按项目分组
             const dayEvents = allEvents.filter(ev => ev.date === dateStr);
@@ -3323,7 +3449,7 @@
                     divEv.style.padding = '8px';
                     divEv.style.marginBottom = '8px';
                     divEv.textContent = `${ev.projectName} → ${ev.stageName}`;
-                    divEv.onclick = () => openEditModal(ev.projectId);
+                    enableCalendarProjectEventDrag(divEv, ev);
                     div.appendChild(divEv);
                 });
             }
@@ -3342,9 +3468,8 @@
                     ev.onclick = () => openTempDetail(t);
                     div.appendChild(ev);
                 });
-
-                grid.appendChild(div);
             }
+            grid.appendChild(div);
         }
 
         // === 临时工作 ===
