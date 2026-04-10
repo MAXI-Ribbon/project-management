@@ -231,7 +231,8 @@
             transform: translateY(-1px);
         }
 
-        .kanban-card.dragging {
+        .kanban-card.dragging,
+        .calendar-event.dragging {
             opacity: 0.5;
             cursor: grabbing;
         }
@@ -1262,7 +1263,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.2.0-beta1';
+        const APP_VERSION = '1.2.0-beta2';
         const BASE_RELEASE_VERSION = '1.1.0';
 
         // 7个生产阶段定义
@@ -1300,6 +1301,23 @@
         let pendingTempDate = null;
         let pendingTempEditId = null;
         let deliveredSelectedMonth = 'all';
+
+        // 更新项目指定阶段的日期（日历拖拽功能）
+        function updateProjectStageDate(projectId, stageId, newDateStr) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            if (!project.stageDates) {
+                project.stageDates = {};
+            }
+            project.stageDates[stageId] = newDateStr;
+            
+            // 添加修改日志
+            addProjectLog(projectId, `拖拽更新【${stages[stageId].name}】日期到 ${newDateStr}`);
+            
+            saveProjects(projects);
+        }
 
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
@@ -3192,8 +3210,18 @@
                     const divEv = document.createElement('div');
                     const stageClass = getStageEventClass(ev.stageId);
                     divEv.className = `calendar-event project ${stageClass}`;
+                    divEv.draggable = true;
                     divEv.textContent = `${ev.projectName} (${ev.stageName})`;
                     divEv.onclick = () => openEditModal(ev.projectId);
+                    divEv.addEventListener('dragstart', (e) => {
+                        draggedProject = { id: ev.projectId, stageId: ev.stageId };
+                        divEv.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+                    divEv.addEventListener('dragend', () => {
+                        draggedProject = null;
+                        divEv.classList.remove('dragging');
+                    });
                     div.appendChild(divEv);
                 });
 
@@ -3205,6 +3233,20 @@
                     ev.textContent = t.title;
                     ev.onclick = () => openTempDetail(t);
                     div.appendChild(ev);
+                });
+
+                // 允许拖放项目到这个日期
+                div.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                div.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedProject && draggedProject.id !== undefined && draggedProject.stageId !== undefined) {
+                        updateProjectStageDate(draggedProject.id, draggedProject.stageId, dateStr);
+                        renderCalendar();
+                        renderProjectList();
+                        renderKanban();
+                    }
                 });
 
                 grid.appendChild(div);
@@ -3265,8 +3307,18 @@
                     const divEv = document.createElement('div');
                     const stageClass = getStageEventClass(ev.stageId);
                     divEv.className = `calendar-event project ${stageClass}`;
+                    divEv.draggable = true;
                     divEv.textContent = `${ev.projectName} (${ev.stageName})`;
                     divEv.onclick = () => openEditModal(ev.projectId);
+                    divEv.addEventListener('dragstart', (e) => {
+                        draggedProject = { id: ev.projectId, stageId: ev.stageId };
+                        divEv.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+                    divEv.addEventListener('dragend', () => {
+                        draggedProject = null;
+                        divEv.classList.remove('dragging');
+                    });
                     div.appendChild(divEv);
                 });
 
@@ -3277,6 +3329,20 @@
                     ev.textContent = t.title;
                     ev.onclick = () => openTempDetail(t);
                     div.appendChild(ev);
+                });
+
+                // 允许拖放项目到这个日期
+                div.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                div.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedProject && draggedProject.id !== undefined && draggedProject.stageId !== undefined) {
+                        updateProjectStageDate(draggedProject.id, draggedProject.stageId, dateStr);
+                        renderCalendar();
+                        renderProjectList();
+                        renderKanban();
+                    }
                 });
 
                 grid.appendChild(div);
@@ -3322,8 +3388,18 @@
                     divEv.style.fontSize = '14px';
                     divEv.style.padding = '8px';
                     divEv.style.marginBottom = '8px';
+                    divEv.draggable = true;
                     divEv.textContent = `${ev.projectName} → ${ev.stageName}`;
                     divEv.onclick = () => openEditModal(ev.projectId);
+                    divEv.addEventListener('dragstart', (e) => {
+                        draggedProject = { id: ev.projectId, stageId: ev.stageId };
+                        divEv.classList.add('dragging');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+                    divEv.addEventListener('dragend', () => {
+                        draggedProject = null;
+                        divEv.classList.remove('dragging');
+                    });
                     div.appendChild(divEv);
                 });
             }
@@ -3342,9 +3418,23 @@
                     ev.onclick = () => openTempDetail(t);
                     div.appendChild(ev);
                 });
-
-                grid.appendChild(div);
             }
+
+            // 允许拖放项目到这个日期
+            div.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+            div.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (draggedProject && draggedProject.id !== undefined && draggedProject.stageId !== undefined) {
+                    updateProjectStageDate(draggedProject.id, draggedProject.stageId, dateStr);
+                    renderCalendar();
+                    renderProjectList();
+                    renderKanban();
+                }
+            });
+
+            grid.appendChild(div);
         }
 
         // === 临时工作 ===
