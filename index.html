@@ -544,7 +544,7 @@
             background: white;
             border-radius: 8px;
             width: 90%;
-            max-width: 550px;
+            max-width: 900px;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -1263,7 +1263,7 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.2.0-beta2';
+        const APP_VERSION = '1.2.0-beta3';
         const BASE_RELEASE_VERSION = '1.1.0';
 
         // 7个生产阶段定义
@@ -1436,13 +1436,16 @@
             document.getElementById('saveTempBtn').addEventListener('click', saveTempWork);
 
             document.getElementById('modal').addEventListener('click', (e) => {
-                if (e.target.id === 'modal') closeModal();
+                // Disable click overlay to close - user must use close button
+                // if (e.target.id === 'modal') closeModal();
             });
             document.getElementById('logModal').addEventListener('click', (e) => {
-                if (e.target.id === 'logModal') closeLogModal();
+                // Disable click overlay to close - user must use close button
+                // if (e.target.id === 'logModal') closeLogModal();
             });
             document.getElementById('tempModal').addEventListener('click', (e) => {
-                if (e.target.id === 'tempModal') closeTempModal();
+                // Disable click overlay to close - user must use close button
+                // if (e.target.id === 'tempModal') closeTempModal();
             });
 
             // 设置默认创建日期
