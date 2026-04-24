@@ -1069,7 +1069,7 @@
                 <option value="delivered">Delivered</option>
                 <option value="installationDeficit">安装补缺</option>
             </select>
-            <input type="text" id="searchInput" placeholder="🔍 搜索项目...">
+            <input type="text" id="searchInput" placeholder="🔍 搜索当前页面内容...">
             <select id="flagFilter">
                 <option value="all">全部状态</option>
                 <option value="normal">正常</option>
@@ -2856,13 +2856,27 @@
         function renderOrderPage() {
             const projects = getProjects();
             const filter = document.getElementById('orderItemStatusFilter').value;
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
             const projectsWithData = projects.filter(projectHasOrderData);
-            // 对每个项目，筛选出符合状态的订单项，如果筛选后没有订单项则隐藏整个项目
+            // 对每个项目，筛选出符合状态和搜索条件的订单项
             const filteredProjectsWithItems = projectsWithData.map(project => {
                 const items = Array.isArray(project.orderItems) ? project.orderItems : [];
-                const filteredItems = filter === 'all'
+                // 先按状态过滤
+                let filteredItems = filter === 'all'
                     ? items
                     : items.filter(item => normalizeOrderStatus(item?.status) === filter);
+                // 再按搜索文本过滤订购内容
+                if (searchText) {
+                    filteredItems = filteredItems.filter(item => {
+                        const haystacks = [
+                            project.name || '',
+                            item.name || '',
+                            item.quantity || '',
+                            normalizeOrderStatus(item?.status)
+                        ].map(v => String(v).toLowerCase());
+                        return haystacks.some(v => v.includes(searchText));
+                    });
+                }
                 return {
                     ...project,
                     filteredOrderItems: filteredItems
@@ -2948,6 +2962,7 @@
         // === 安装补缺页面 ===
         function renderInstallationDeficitPage() {
             const projects = getProjects();
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
             const allDeficits = [];
             projects.forEach(project => {
                 if (project.installationDeficits && Array.isArray(project.installationDeficits)) {
@@ -2961,15 +2976,27 @@
                 }
             });
 
+            // 根据安装补缺内容和项目名称搜索
+            const filteredDeficits = searchText
+                ? allDeficits.filter(deficit => {
+                    const haystacks = [
+                        deficit.projectName || '',
+                        deficit.content || '',
+                        deficit.status || ''
+                    ].map(v => String(v).toLowerCase());
+                    return haystacks.some(v => v.includes(searchText));
+                })
+                : allDeficits;
+
             const tbody = document.getElementById('installationDeficitTableBody');
             if (!tbody) return;
 
-            if (allDeficits.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 30px;">暂无安装补缺记录</td></tr>';
+            if (filteredDeficits.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #999; padding: 30px;">${searchText ? '无匹配的安装补缺记录' : '暂无安装补缺记录'}</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = allDeficits.map(deficit => {
+            tbody.innerHTML = filteredDeficits.map(deficit => {
                 const statusOptions = INSTALLATION_DEFICIT_STATUSES.map(s => `<option value="${s}"${deficit.status === s ? ' selected' : ''}>${s}</option>`).join('');
                 return `
                     <tr data-project-id="${deficit.projectId}" data-deficit-id="${deficit.id}">
@@ -3153,6 +3180,7 @@
 
         function renderDeliveredPage() {
             const projects = getProjects().filter(project => project.currentStage === 7);
+            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
             const summaryContainer = document.getElementById('deliveredSummaryContainer');
             const container = document.getElementById('deliveredProjectsContainer');
             if (!summaryContainer || !container) return;
@@ -3352,6 +3380,19 @@
                 if (paymentFilter === 'unpaid') return unpaidAmount > 0;
                 return true;
             });
+
+            // 第四步：搜索文本筛选（针对交付页面内容）
+            if (searchText) {
+                filtered = filtered.filter(({ project }) => {
+                    const haystacks = [
+                        project.name || '',
+                        project.description || '',
+                        resolveDeliveredDate(project) || '',
+                        (stages[7] && stages[7].name) || ''
+                    ].map(v => String(v).toLowerCase());
+                    return haystacks.some(v => v.includes(searchText));
+                });
+            }
 
             // 提取项目数组
             let filteredProjects = filtered.map(item => item.project);
