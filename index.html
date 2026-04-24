@@ -86,6 +86,69 @@
             background-color: #4096ff;
         }
 
+        /* 安装补缺页面样式 */
+        .deficit-project-search {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+
+        .project-search-dropdown {
+            position: absolute;
+            width: calc(100% - 2px);
+            max-height: 250px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            z-index: 100;
+            display: none;
+            margin-top: -1px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .project-search-dropdown.show {
+            display: block;
+        }
+
+        .project-search-item {
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .project-search-item:hover {
+            background-color: #e6f4ff;
+        }
+
+        .project-search-item.selected {
+            background-color: #1677ff;
+            color: white;
+        }
+
+        .project-search-item.empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .deficit-status-select {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        #installationDeficitTableBody td:first-child {
+            position: relative;
+            min-width: 200px;
+        }
+
         .btn-danger {
             background-color: #ff4d4f;
             color: white;
@@ -1004,6 +1067,7 @@
                 <option value="calendar">日历视图</option>
                 <option value="order">订购</option>
                 <option value="delivered">Delivered</option>
+                <option value="installationDeficit">安装补缺</option>
             </select>
             <input type="text" id="searchInput" placeholder="🔍 搜索项目...">
             <select id="flagFilter">
@@ -1071,6 +1135,30 @@
                 <div class="list-meta" style="margin-bottom: 12px;">按项目分组查看采购/订购项，变更状态即可同步保存。</div>
                 <div id="orderProjectsContainer"></div>
             </div>
+        </div>
+
+        <!-- 安装补缺页面 -->
+        <div id="installationDeficitPage" class="page-view">
+            <div class="list-header">
+                <div class="list-name">安装补缺清单</div>
+            </div>
+            <div class="list-meta" style="margin-bottom: 15px;">按项目管理安装补缺内容，状态变更自动写入项目修改日志。</div>
+            <div class="toolbar">
+                <button type="button" class="btn-primary" id="addInstallationDeficitBtn">+ 新增补缺</button>
+            </div>
+            <table class="kanban-project-table" style="margin-top: 15px; width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">项目名称</th>
+                        <th style="width: 50%;">补缺内容</th>
+                        <th style="width: 15%;">状态</th>
+                        <th style="width: 10%;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="installationDeficitTableBody">
+                    <!-- 动态生成 -->
+                </tbody>
+            </table>
         </div>
 
         <!-- Delivered 页面 -->
@@ -1211,6 +1299,23 @@
                     </div>
 
                     <div class="form-group">
+                        <label>安装补缺</label>
+                        <table class="order-items-table" id="editInstallationDeficitsTable">
+                            <thead>
+                                <tr>
+                                    <th>补缺内容</th>
+                                    <th style="width: 120px;">状态</th>
+                                    <th style="width: 90px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="editInstallationDeficitsContainer">
+                                <!-- 动态生成 -->
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn-primary" id="addEditInstallationDeficitBtn">+ 添加行</button>
+                    </div>
+
+                    <div class="form-group">
                         <label for="description">备注 / 联系人信息</label>
                         <textarea id="description" placeholder="输入联系人电话、备注信息等"></textarea>
                     </div>
@@ -1263,7 +1368,8 @@
     </div>
 
     <script>
-        const APP_VERSION = '1.2.0-beta5';
+        const APP_VERSION = '1.2.0-beta6';
+        const INSTALLATION_DEFICIT_STATUSES = ['未生产', '已生产', '已带现场'];
         const BASE_RELEASE_VERSION = '1.1.0';
 
         // 7个生产阶段定义
@@ -1408,6 +1514,8 @@
             document.getElementById('flagFilter').addEventListener('change', renderCurrentPage);
             document.getElementById('orderItemStatusFilter').addEventListener('change', renderOrderPage);
             document.getElementById('addOrderRowBtn').addEventListener('click', () => addOrderRow());
+            document.getElementById('addInstallationDeficitBtn').addEventListener('click', addGlobalInstallationDeficit);
+            document.getElementById('addEditInstallationDeficitBtn').addEventListener('click', () => addInstallationDeficitRow());
             // Delivered 页面筛选排序事件
             ['deliveredDateStart', 'deliveredDateEnd', 'deliveredPaymentFilter', 'deliveredSortBy'].forEach(id => {
                 document.getElementById(id).addEventListener('change', renderDeliveredPage);
@@ -1483,6 +1591,9 @@
             } else if (selected === 'delivered') {
                 document.getElementById('deliveredPage').classList.add('active');
                 renderDeliveredPage();
+            } else if (selected === 'installationDeficit') {
+                document.getElementById('installationDeficitPage').classList.add('active');
+                renderInstallationDeficitPage();
             }
             updateStats();
         }
@@ -1499,6 +1610,8 @@
                 renderOrderPage();
             } else if (selected === 'delivered') {
                 renderDeliveredPage();
+            } else if (selected === 'installationDeficit') {
+                renderInstallationDeficitPage();
             }
         }
 
@@ -1811,6 +1924,16 @@
             const orderItems = normalizeOrderItems(source.orderItems);
             const orderStatus = normalizeOrderStatus(source.orderStatus);
 
+            const installationDeficits = Array.isArray(source.installationDeficits)
+                ? source.installationDeficits.map(item => ({
+                    id: item.id || Date.now() + Math.random(),
+                    projectId: item.projectId || null,
+                    projectName: typeof item.projectName === 'string' ? item.projectName : '',
+                    content: typeof item.content === 'string' ? item.content : '',
+                    status: INSTALLATION_DEFICIT_STATUSES.includes(item.status) ? item.status : '未生产'
+                }))
+                : [];
+
             // 配送方式：空 / 自取 / 送货 / 安装
             let deliveryType = '';
             if (source.deliveryType === '自取' || source.deliveryType === '送货' || source.deliveryType === '安装') {
@@ -1840,6 +1963,7 @@
                 stageDates,
                 progressPayments,
                 orderItems,
+                installationDeficits,
                 logs,
                 version,
                 updatedAt
@@ -2276,6 +2400,50 @@
             }).filter(item => item.name || item.quantity);
         }
 
+        // === 安装补缺相关函数 ===
+        function addInstallationDeficitRow(item = null, containerId = 'editInstallationDeficitsContainer') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const row = document.createElement('tr');
+            const itemId = item && item.id ? item.id : Date.now() + Math.random();
+            row.dataset.deficitId = itemId;
+            row.innerHTML = `
+                <td><textarea class="deficit-content" placeholder="输入补缺内容" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 45px; resize: vertical; font-family: inherit; font-size: 13px;">${item && item.content ? item.content.replace(/"/g, '&quot;') : ''}</textarea></td>
+                <td>
+                    <select class="deficit-status" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        ${INSTALLATION_DEFICIT_STATUSES.map(s => `<option value="${s}" ${item && item.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+                    </select>
+                </td>
+                <td><button type="button" class="btn-danger delete-deficit-btn" style="padding: 4px 8px; font-size: 12px;">删除</button></td>
+            `;
+            row.querySelector('.delete-deficit-btn').addEventListener('click', () => row.remove());
+            container.appendChild(row);
+        }
+
+        function resetInstallationDeficitRows(items = [], containerId = 'editInstallationDeficitsContainer') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            if (!items || items.length === 0) return;
+            items.forEach(item => addInstallationDeficitRow(item, containerId));
+        }
+
+        function collectInstallationDeficitsFromForm(projectId, projectName) {
+            const container = document.getElementById('editInstallationDeficitsContainer');
+            if (!container) return [];
+            return Array.from(container.querySelectorAll('tr')).map(row => {
+                const contentInput = row.querySelector('.deficit-content');
+                const statusSelect = row.querySelector('.deficit-status');
+                return {
+                    id: row.dataset.deficitId || Date.now() + Math.random(),
+                    projectId: projectId,
+                    projectName: projectName,
+                    content: contentInput ? contentInput.value.trim() : '',
+                    status: statusSelect ? statusSelect.value : '未生产'
+                };
+            }).filter(item => item.content);
+        }
+
         // === 弹窗操作 ===
         function openAddModal() {
             document.getElementById('modalTitle').textContent = '添加新项目';
@@ -2299,6 +2467,7 @@
             }
 
             resetOrderRows();
+            resetInstallationDeficitRows([]);
 
             document.getElementById('currentStage').value = '0';
             document.getElementById('projectFlag').value = '';
@@ -2345,6 +2514,7 @@
 
             document.getElementById('deliveryType').value = project.deliveryType || '';
             resetOrderRows(project.orderItems || []);
+            resetInstallationDeficitRows(project.installationDeficits || []);
 
             updateTotalSummary();
             document.getElementById('modal').classList.add('show');
@@ -2382,6 +2552,8 @@
 
             const orderItems = collectOrderItemsFromForm();
             const deliveryType = document.getElementById('deliveryType').value;
+            const projectNameVal = document.getElementById('projectName').value.trim();
+            const installationDeficits = collectInstallationDeficitsFromForm(existingProject ? existingProject.id : Date.now(), projectNameVal);
 
             const currentStage = parseInt(document.getElementById('currentStage').value, 10);
             const projectFlag = normalizeProjectFlag(document.getElementById('projectFlag').value);
@@ -2400,6 +2572,7 @@
                 stageDates: stageDates,
                 progressPayments: progressPayments,
                 orderItems: orderItems,
+                installationDeficits: installationDeficits,
                 logs: existingProject ? (existingProject.logs || []) : [],
                 version: existingProject ? (Math.max(Number(existingProject.version) || 1, 1) + 1) : 1,
                 updatedAt: nowTimestamp
@@ -2415,6 +2588,14 @@
                     if (normalizeProjectFlag(existingProject.projectFlag) !== projectFlag) {
                         logs.unshift(createLogEntry('更新项目状态', `${getProjectFlagLabel(existingProject.projectFlag)} → ${getProjectFlagLabel(projectFlag)}`));
                     }
+                    // 检测安装补缺状态变更并添加日志
+                    const oldDeficits = existingProject.installationDeficits || [];
+                    installationDeficits.forEach(newDeficit => {
+                        const oldDeficit = oldDeficits.find(d => String(d.id) === String(newDeficit.id));
+                        if (oldDeficit && oldDeficit.status !== newDeficit.status) {
+                            logs.unshift(createLogEntry('安装补缺状态变更', `${newDeficit.content}: ${oldDeficit.status} → ${newDeficit.status}`));
+                        }
+                    });
                     project.logs = logs;
                     projects[index] = normalizeProject(project);
                 }
@@ -2762,6 +2943,212 @@
             projects[index].version = Math.max(Number(projects[index].version) || 1, 1) + 1;
             saveProjects(projects);
             updateStats();
+        }
+
+        // === 安装补缺页面 ===
+        function renderInstallationDeficitPage() {
+            const projects = getProjects();
+            const allDeficits = [];
+            projects.forEach(project => {
+                if (project.installationDeficits && Array.isArray(project.installationDeficits)) {
+                    project.installationDeficits.forEach(deficit => {
+                        allDeficits.push({
+                            ...deficit,
+                            projectId: project.id,
+                            projectName: project.name
+                        });
+                    });
+                }
+            });
+
+            const tbody = document.getElementById('installationDeficitTableBody');
+            if (!tbody) return;
+
+            if (allDeficits.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 30px;">暂无安装补缺记录</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = allDeficits.map(deficit => {
+                const statusOptions = INSTALLATION_DEFICIT_STATUSES.map(s => `<option value="${s}"${deficit.status === s ? ' selected' : ''}>${s}</option>`).join('');
+                return `
+                    <tr data-project-id="${deficit.projectId}" data-deficit-id="${deficit.id}">
+                        <td>
+                            <input type="text" class="deficit-project-search" 
+                                   value="${escapeHtml(deficit.projectName)}" 
+                                   placeholder="搜索项目..." 
+                                   data-deficit-id="${deficit.id}"
+                                   data-original-project-id="${deficit.projectId}"
+                                   onfocus="showProjectSearchList(this)"
+                                   oninput="filterProjectSearchList(this)"
+                                   onblur="hideProjectSearchList(this)">
+                            <div class="project-search-dropdown" data-deficit-id="${deficit.id}"></div>
+                        </td>
+                        <td><textarea class="deficit-content-input" onchange="updateInstallationDeficitContent(${deficit.id}, this.value)" style="width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; min-height: 50px; resize: vertical; font-family: inherit; font-size: 13px;">${escapeHtml(deficit.content)}</textarea></td>
+                        <td>
+                            <select class="deficit-status-select" onchange="updateInstallationDeficitStatus(${deficit.projectId}, ${deficit.id}, this.value)">
+                                ${statusOptions}
+                            </select>
+                        </td>
+                        <td><button class="btn-danger" onclick="deleteInstallationDeficit(${deficit.projectId}, ${deficit.id})" style="padding: 4px 8px; font-size: 12px;">删除</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateInstallationDeficitProject(deficitId, newProjectId) {
+            if (!newProjectId) return;
+            const projects = getProjects();
+            const projectsWithDeficit = projects.filter(p => p.installationDeficits && p.installationDeficits.some(d => String(d.id) === String(deficitId)));
+            if (projectsWithDeficit.length > 0) {
+                const oldProject = projectsWithDeficit[0];
+                const deficit = oldProject.installationDeficits.find(d => String(d.id) === String(deficitId));
+                if (deficit && String(oldProject.id) !== String(newProjectId)) {
+                    // 从原项目删除
+                    oldProject.installationDeficits = oldProject.installationDeficits.filter(d => String(d.id) !== String(deficitId));
+                    oldProject.updatedAt = getCurrentTimestamp();
+                    oldProject.version = Math.max(Number(oldProject.version) || 1, 1) + 1;
+                    // 添加到新项目
+                    const newProject = projects.find(p => String(p.id) === String(newProjectId));
+                    if (newProject) {
+                        deficit.projectId = newProject.id;
+                        deficit.projectName = newProject.name;
+                        if (!newProject.installationDeficits) newProject.installationDeficits = [];
+                        newProject.installationDeficits.push(deficit);
+                        newProject.updatedAt = getCurrentTimestamp();
+                        newProject.version = Math.max(Number(newProject.version) || 1, 1) + 1;
+                    }
+                    saveProjects(projects);
+                    renderInstallationDeficitPage();
+                }
+            }
+        }
+
+        function updateInstallationDeficitContent(deficitId, content) {
+            const projects = getProjects();
+            projects.forEach(project => {
+                if (project.installationDeficits) {
+                    const deficit = project.installationDeficits.find(d => String(d.id) === String(deficitId));
+                    if (deficit) {
+                        deficit.content = content;
+                        project.updatedAt = getCurrentTimestamp();
+                        project.version = Math.max(Number(project.version) || 1, 1) + 1;
+                    }
+                }
+            });
+            saveProjects(projects);
+        }
+
+        function updateInstallationDeficitStatus(projectId, deficitId, status) {
+            const projects = getProjects();
+            const project = projects.find(p => String(p.id) === String(projectId));
+            if (project && project.installationDeficits) {
+                const deficit = project.installationDeficits.find(d => String(d.id) === String(deficitId));
+                if (deficit && deficit.status !== status) {
+                    const oldStatus = deficit.status;
+                    deficit.status = status;
+                    if (!project.logs) project.logs = [];
+                    project.logs.unshift(createLogEntry('安装补缺状态变更', `${deficit.content}: ${oldStatus} → ${status}`));
+                    project.updatedAt = getCurrentTimestamp();
+                    project.version = Math.max(Number(project.version) || 1, 1) + 1;
+                    saveProjects(projects);
+                    renderInstallationDeficitPage();
+                }
+            }
+        }
+
+        function deleteInstallationDeficit(projectId, deficitId) {
+            if (!confirm('确定要删除这条安装补缺记录吗？')) return;
+            const projects = getProjects();
+            const project = projects.find(p => String(p.id) === String(projectId));
+            if (project && project.installationDeficits) {
+                project.installationDeficits = project.installationDeficits.filter(d => String(d.id) !== String(deficitId));
+                project.updatedAt = getCurrentTimestamp();
+                project.version = Math.max(Number(project.version) || 1, 1) + 1;
+                saveProjects(projects);
+                renderInstallationDeficitPage();
+            }
+        }
+
+        function addGlobalInstallationDeficit() {
+            const projects = getProjects();
+            if (projects.length === 0) {
+                alert('请先创建项目');
+                return;
+            }
+            const defaultProject = projects[0];
+            const newDeficit = {
+                id: Date.now() + Math.random(),
+                projectId: defaultProject.id,
+                projectName: defaultProject.name,
+                content: '',
+                status: '未生产'
+            };
+
+            defaultProject.installationDeficits = defaultProject.installationDeficits || [];
+            defaultProject.installationDeficits.push(newDeficit);
+            defaultProject.updatedAt = getCurrentTimestamp();
+            defaultProject.version = Math.max(Number(defaultProject.version) || 1, 1) + 1;
+            saveProjects(projects);
+            renderInstallationDeficitPage();
+        }
+
+        // === 项目搜索下拉框函数 ===
+        function showProjectSearchList(input) {
+            const deficitId = input.dataset.deficitId;
+            const dropdown = document.querySelector(`.project-search-dropdown[data-deficit-id="${deficitId}"]`);
+            if (!dropdown) return;
+            dropdown.classList.add('show');
+            renderProjectSearchList(dropdown, deficitId, input.value);
+        }
+
+        function hideProjectSearchList(input) {
+            const deficitId = input.dataset.deficitId;
+            const dropdown = document.querySelector(`.project-search-dropdown[data-deficit-id="${deficitId}"]`);
+            setTimeout(() => {
+                if (dropdown) dropdown.classList.remove('show');
+            }, 200);
+        }
+
+        function filterProjectSearchList(input) {
+            const deficitId = input.dataset.deficitId;
+            const dropdown = document.querySelector(`.project-search-dropdown[data-deficit-id="${deficitId}"]`);
+            if (!dropdown) return;
+            renderProjectSearchList(dropdown, deficitId, input.value);
+        }
+
+        function renderProjectSearchList(dropdown, deficitId, filterText) {
+            const projects = getProjects();
+            const filteredProjects = filterText.trim()
+                ? projects.filter(p => p.name.toLowerCase().includes(filterText.toLowerCase()))
+                : projects;
+
+            if (filteredProjects.length === 0) {
+                dropdown.innerHTML = '<div class="project-search-item empty">无匹配项目</div>';
+                return;
+            }
+
+            dropdown.innerHTML = filteredProjects.map(project => {
+                return `
+                    <div class="project-search-item" 
+                         onclick="selectProjectForDeficit(${deficitId}, ${project.id}, '${escapeHtml(project.name).replace(/'/g, "\\'")}')"
+                         title="${escapeHtml(project.name)}">
+                        ${escapeHtml(project.name)}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectProjectForDeficit(deficitId, projectId, projectName) {
+            const input = document.querySelector(`.deficit-project-search[data-deficit-id="${deficitId}"]`);
+            if (input) {
+                input.value = projectName;
+            }
+            const dropdown = document.querySelector(`.project-search-dropdown[data-deficit-id="${deficitId}"]`);
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+            updateInstallationDeficitProject(deficitId, projectId);
         }
 
         function renderDeliveredPage() {
