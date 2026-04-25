@@ -3872,9 +3872,9 @@
         function openAddTempWork(dateStr) {
             pendingTempDate = dateStr;
             pendingTempEditId = null;
+            document.getElementById('tempForm').reset();
             document.getElementById('tempDate').value = dateStr;
             document.getElementById('tempModalTitle').textContent = `添加当日临时工作`;
-            document.getElementById('tempForm').reset();
             document.getElementById('tempModal').classList.add('show');
         }
 
